@@ -1,0 +1,745 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="./sproject_html.xsl"?>
+<!DOCTYPE sproject SYSTEM "sproject.dtd">
+<sproject>
+    <course database="Oracle" version="11">
+        <cname>Databázové systémy</cname>
+            <code>BI-DBS.21</code>
+            <semester>B232</semester>
+            <seminar>Wednesday 11:00, Even week, paralelka 1247713526705</seminar>
+    </course>
+        <author>
+            <aname>Mariia Ternavska</aname>
+            <uname>ternamar</uname>
+            <email>ternamar@fit.cvut.cz</email>
+        </author>
+    <content>
+        <declaration>I declare that I have developed my semestral work independently. All the sources I used are listed in the section References.</declaration>
+            <title>Music and social app MMeet</title>
+        <description>
+            <title>Description</title>
+                    <para>The MMeet platform is an application redefining how music lovers engage with their favorite artists, songs, and fellow enthusiasts. Through an extensive database architecture, users connect with  events, public channels and friendships. </para>
+                    <para>**Users** are at the core of the platform, each with a unique username and email for authentication. Users can also choose to add their bank information to make purchases in app. Additionally, users can provide personal information or share their location. Furthermore, users have the option to connect with friends within the platform. Each user may choose to buy a **subscription** in app.</para>
+                    <para>**Artists** each have a dedicated profile that includes biographical information, photos, and a comprehensive discography. Artists can showcase their upcoming events and have the option to feature advertisements on their profiles. They are associated with events, where they are featured. Additionally, artists can offer official **merchandise** for sale on their profiles, allowing fans to support their favorite artists and purchase merchandise directly through the platform.</para>
+                    <para>**Locations** serve as geographical entities within the MMeet platform, encompassing venues, cities, and regions where events take place. Each location may be associated with specific events and/or public channels, allowing users to discover local talents and new musical experiences.</para>
+                    <para>**Events** on the MMeet platform can be concerts, discos and festivals. Each event has a unique title and features one or more artists performing. The location, date, and description provide users with essential information about the event.</para>
+                    <para>**Public** **channels** serve as thematic hubs, catering to specific musical genres, regions, or interests. Users can join public channels to engage in discussions. Each public channel is moderated to maintain quality and relevance.</para>
+                    <para>**Playlists** enable users to curate personalized collections of their favorite tracks within the MMeet platform. Each playlist is characterized by its title and comprises a selection of songs from various artists and genres. Users have the flexibility to create, edit, and share playlists with friends.</para>
+                    <para>**Content** **moderators** are responsible for ensuring that user-generated content within the MMeet platform complies with community guidelines and standards.</para>
+                    <para>Each content moderator and artist must also be a user on the app, but not all users need to have these types of accounts.</para>
+        </description>
+        <data_model>
+            <title>Conceptual schema</title>
+            <dm_picture>
+                <mediaobject>
+                    <imageobject>
+                        <imagedata fileref="conceptual_schema.png"/>
+                    </imageobject>
+                </mediaobject>
+            </dm_picture>
+            <dm_discussion>
+                        <para>In my conceptual schema, there is only one loop that I would like to describe. The loop is a relation **basic_user** to **basic_user**. This relation indicates &quot;friendship&quot; between users on the platform — each user may be connected to other users they choose to mark as friends. This loop cannot cause any data inconsistencies because it does not affect anything except for a friendship list, where the existence of the loop is justified by the need to be able to get from one user to another through this relation.</para>
+            </dm_discussion>
+        </data_model>
+        <relational_model>
+            <title>Relational schema</title>
+            <rm_picture>
+                <mediaobject>
+                    <imageobject>
+                        <imagedata fileref="relational_schema.png"/>
+                    </imageobject>
+                </mediaobject>
+            </rm_picture>
+        </relational_model>
+        <queries>
+            <title>Queries</title>
+            <dotazy>
+                    <dotaz dotaz_id="D1">
+                        <popis_dotazu>
+                                <para> Can you provide information about the artist who participated in the most events? 
+</para>
+                        </popis_dotazu>
+                    </dotaz>
+                    <dotaz dotaz_id="D3">
+                        <popis_dotazu>
+                                <para>Can you provide information about official merchandise from the band &quot;The Beatles&quot; that has a price lower than 50 USD?
+   </para>
+                        </popis_dotazu>
+                            <relacni_algebra>{merchandise_product&lt;*{artist_user &lt;* users(full_name = &apos;The Beatles&apos;)}[username]}(product_price &lt; 50)</relacni_algebra>
+                            <sql>SELECT mp.*
+FROM MERCHANDISE_PRODUCT mp
+JOIN (
+    SELECT au.*
+    FROM ARTIST_USER au
+    JOIN (
+        SELECT DISTINCT *
+        FROM USERS
+        WHERE full_name = &apos;The Beatles&apos;
+    ) beatles_user ON au.username = beatles_user.username
+) beatles_artists ON mp.username = beatles_artists.username
+WHERE mp.product_price &lt; 50;
+
+
+</sql>
+                    </dotaz>
+                    <dotaz dotaz_id="D6">
+                        <popis_dotazu>
+                                <para>Can you show how many friends in the app does user with a username mariia1234 have?</para>
+                        </popis_dotazu>
+                    </dotaz>
+                    <dotaz dotaz_id="D7">
+                        <popis_dotazu>
+                                <para>Show full names of those users, who are only moderators of a public channel named &quot;Chanel123&quot; and no other channels</para>
+                        </popis_dotazu>
+                            <relacni_algebra>{public_channel * users}(channel_name = &apos;Chanel123&apos;)[full_name] \ {public_channel * users}(channel_name != &apos;Chanel123&apos;)[full_name]</relacni_algebra>
+                            <sql>SELECT full_name
+FROM PUBLIC_CHANNEL
+NATURAL JOIN USERS
+WHERE channel_name = &apos;Chanel123&apos;
+EXCEPT
+SELECT full_name
+FROM PUBLIC_CHANNEL
+NATURAL JOIN USERS
+WHERE channel_name &lt;&gt; &apos;Chanel123&apos;;
+</sql>
+                    </dotaz>
+                    <dotaz dotaz_id="D8">
+                        <popis_dotazu>
+                                <para>Select all artists, who were featured in all events </para>
+                        </popis_dotazu>
+                            <relacni_algebra>{event_artist_user[username, event_id] ÷ event[event_id]}*artist_user</relacni_algebra>
+                            <sql>SELECT *
+FROM artist_user
+WHERE username IN (
+    SELECT DISTINCT username
+    FROM event_artist_user
+    GROUP BY username
+    HAVING COUNT(DISTINCT event_id) = (
+        SELECT COUNT(DISTINCT event_id)
+        FROM event
+    )
+);
+</sql>
+                    </dotaz>
+                    <dotaz dotaz_id="D9">
+                        <popis_dotazu>
+                                <para>Select only those events, that took place in Prague</para>
+                        </popis_dotazu>
+                            <relacni_algebra>{event &lt;* location(city = &apos;Prague&apos;)}</relacni_algebra>
+                            <sql>SELECT event.*
+FROM EVENT
+NATURAL JOIN (
+    SELECT DISTINCT *
+    FROM LOCATION
+    WHERE city = &apos;Prague&apos;
+);
+</sql>
+                    </dotaz>
+                    <dotaz dotaz_id="D11">
+                        <popis_dotazu>
+                                <para>Select only events, that feature artist with full name Hannah Jackson and no other artists</para>
+                        </popis_dotazu>
+                            <relacni_algebra>{event &lt;* {event_artist_user[event_artist_user.username = users.username]users}(full_name = &apos;Hannah Jackson&apos;)} \ {event &lt;* {event_artist_user[event_artist_user.username = users.username]users}(full_name != &apos;Hannah Jackson&apos;)}</relacni_algebra>
+                            <sql>SELECT DISTINCT e.*
+FROM EVENT e
+JOIN (
+    SELECT DISTINCT ea.event_id,
+                    ea.username,
+                    u.username AS artist_username,
+                    u.full_name,
+                    u.mobile_phone,
+                    u.email,
+                    u.links_media
+    FROM EVENT_ARTIST_USER ea
+    JOIN USERS u ON ea.username = u.username
+    WHERE u.full_name = &apos;Hannah Jackson&apos;
+) hannah_events ON e.event_id = hannah_events.event_id
+EXCEPT
+SELECT DISTINCT e1.*
+FROM EVENT e1
+JOIN (
+    SELECT DISTINCT ea1.event_id,
+                    ea1.username,
+                    u1.username AS artist_username,
+                    u1.full_name,
+                    u1.mobile_phone,
+                    u1.email,
+                    u1.links_media
+    FROM EVENT_ARTIST_USER ea1
+    JOIN USERS u1 ON ea1.username = u1.username
+    WHERE u1.full_name != &apos;Hannah Jackson&apos;
+) other_events ON e1.event_id = other_events.event_id;
+</sql>
+                    </dotaz>
+                    <dotaz dotaz_id="D12">
+                        <popis_dotazu>
+                                <para>Select playlist that contains a song with the name &apos;Push it&apos;</para>
+                        </popis_dotazu>
+                    </dotaz>
+                    <dotaz dotaz_id="D13">
+                        <popis_dotazu>
+                                <para>Select artists that sell merchandise products with the product name &apos;Pink hoodie&apos;</para>
+                        </popis_dotazu>
+                            <relacni_algebra>artist_user&lt;*merchandise_product(product_name = &apos;Pink hoodie&apos;)</relacni_algebra>
+                            <sql>SELECT artist_user.*
+FROM artist_user JOIN merchandise_product USING(username)
+WHERE product_name = &apos;Pink hoodie&apos;</sql>
+                    </dotaz>
+                    <dotaz dotaz_id="D14">
+                        <popis_dotazu>
+                                <para>Select an artist user that has no songs</para>
+                        </popis_dotazu>
+                            <relacni_algebra>{artist_user * users}[full_name]\{song_artist_user * users}[full_name]</relacni_algebra>
+                            <sql>SELECT DISTINCT full_name
+FROM ARTIST_USER
+NATURAL JOIN USERS
+EXCEPT
+SELECT DISTINCT full_name
+FROM SONG_ARTIST_USER
+NATURAL JOIN USERS USERS1;</sql>
+                    </dotaz>
+                    <dotaz dotaz_id="D15">
+                        <popis_dotazu>
+                                <para>Select any playlist that was created by a basic user with full name Mariia Ternavska</para>
+                        </popis_dotazu>
+                            <relacni_algebra>playlist&lt;*users(full_name=&apos;Mariia Ternavska&apos;)</relacni_algebra>
+                            <sql>SELECT playlist.*
+FROM PLAYLIST
+NATURAL JOIN (
+    SELECT DISTINCT *
+    FROM USERS
+    WHERE full_name = &apos;Mariia Ternavska&apos;
+) R1;</sql>
+                    </dotaz>
+                    <dotaz dotaz_id="D16">
+                        <popis_dotazu>
+                                <para>Create a view on artists whose music genre is Rock</para>
+                        </popis_dotazu>
+                            <sql>create or replace view Rockstars as
+SELECT DISTINCT *
+FROM ARTIST_USER
+WHERE genre = &apos;Rock&apos;;</sql>
+                    </dotaz>
+                    <dotaz dotaz_id="D17">
+                        <popis_dotazu>
+                                <para>Select all artists whose music genre is Pop or Jazz</para>
+                        </popis_dotazu>
+                            <relacni_algebra>artist_user(genre = &apos;Pop&apos; ∨ genre = &apos;Jazz&apos;)</relacni_algebra>
+                            <sql>SELECT DISTINCT *
+FROM ARTIST_USER
+WHERE genre = &apos;Pop&apos; OR genre = &apos;Jazz&apos;;</sql>
+                    </dotaz>
+                    <dotaz dotaz_id="D18">
+                        <popis_dotazu>
+                                <para>Select all events that are taking place in locations located within the USA</para>
+                        </popis_dotazu>
+                            <sql>SELECT * FROM event
+WHERE location_id IN (SELECT location_id FROM location WHERE country = &apos;United States&apos;);</sql>
+                    </dotaz>
+                    <dotaz dotaz_id="D20">
+                        <popis_dotazu>
+                                <para>Show information about events and their corresponding locations</para>
+                        </popis_dotazu>
+                            <relacni_algebra>{event × location}(event.location_id = location.location_id)[description -&gt; event_description, country, city, address]</relacni_algebra>
+                            <sql>SELECT e.description AS event_description, l.country, l.city, l.address
+FROM event e
+CROSS JOIN location l
+WHERE e.location_id = l.location_id;
+</sql>
+                    </dotaz>
+                    <dotaz dotaz_id="D21">
+                        <popis_dotazu>
+                                <para>Retrieve the full names of users along with their associated artist information, if available</para>
+                        </popis_dotazu>
+                            <sql>SELECT u.full_name, a.discography, a.biography
+FROM users u
+LEFT JOIN artist_user a ON u.username = a.username;</sql>
+                    </dotaz>
+                    <dotaz dotaz_id="D22">
+                        <popis_dotazu>
+                                <para>Show me details about events and where they&apos;re happening. Include all events, even if we don&apos;t have a location for them, and all locations, even if there are no events scheduled there.</para>
+                        </popis_dotazu>
+                            <sql>SELECT e.description AS event_description, l.country, l.region, l.city, l.address
+FROM event e
+FULL OUTER JOIN location l ON e.location_id = l.location_id;</sql>
+                    </dotaz>
+                    <dotaz dotaz_id="D23">
+                        <popis_dotazu>
+                                <para>What genres are shared between the artists registered in the artist_user table and the preferred genres specified in the public channels</para>
+                        </popis_dotazu>
+                            <sql>SELECT genre FROM artist_user
+INTERSECT
+SELECT preferred_genre FROM public_channel;
+
+</sql>
+                    </dotaz>
+                    <dotaz dotaz_id="D24">
+                        <popis_dotazu>
+                                <para>Show me artsist who participated in events after 01.01.2022 along with the count of these events in descending order</para>
+                        </popis_dotazu>
+                            <sql>SELECT 
+    users.full_name,
+    COUNT(*) AS total_events
+FROM 
+    users
+JOIN 
+    artist_user ON users.username = artist_user.username
+JOIN 
+    event_artist_user ON artist_user.username = event_artist_user.username
+JOIN 
+    event ON event_artist_user.event_id = event.event_id
+WHERE 
+    event.date &gt; &apos;01.01.2022&apos;
+GROUP BY 
+    users.full_name
+HAVING 
+    COUNT(*) &gt; 1
+ORDER BY 
+    total_events DESC;
+
+</sql>
+                    </dotaz>
+                    <dotaz dotaz_id="D25">
+                        <popis_dotazu>
+                                <para>Song that was not sung by any registered artist user</para>
+                        </popis_dotazu>
+                            <relacni_algebra>song !&lt;* song_artist_user</relacni_algebra>
+                            <sql>SELECT DISTINCT song.*
+FROM song 
+WHERE NOT EXISTS (
+    SELECT 1
+    FROM song_artist_user
+    WHERE song_artist_user.song_id = song.song_id
+);
+</sql>
+                    </dotaz>
+                    <dotaz dotaz_id="D26">
+                        <popis_dotazu>
+                                <para>Artist users that either participated in any kind of event, or have a song or a platform (or both)</para>
+                        </popis_dotazu>
+                            <relacni_algebra>artist_user &lt;* event
+∪
+artist_user &lt;* song</relacni_algebra>
+                            <sql>SELECT DISTINCT au.*
+FROM (
+    SELECT DISTINCT username,
+                    manager_user_username,
+                    discography,
+                    biography,
+                    genre,
+                    photos
+    FROM ARTIST_USER
+    NATURAL JOIN EVENT
+    UNION
+    SELECT DISTINCT *
+    FROM ARTIST_USER
+) au
+NATURAL JOIN SONG;
+</sql>
+                    </dotaz>
+                    <dotaz dotaz_id="D27">
+                        <popis_dotazu>
+                                <para>Select a number of songs that are in playlist, created by user with the full_name mariia123</para>
+                        </popis_dotazu>
+                            <sql>SELECT (
+    SELECT count(*) FROM basic_user JOIN users USING(username) JOIN playlist USING(username) JOIN song_playlist USING(playlist_id) 
+    WHERE full_name = &apos;mariia123&apos;
+    LIMIT 1
+) AS songs_in_playlist;
+</sql>
+                    </dotaz>
+                    <dotaz dotaz_id="D28">
+                        <popis_dotazu>
+                                <para>Check question of category D1 (Select all artists, who were featured in all events)</para>
+                        </popis_dotazu>
+                            <sql>SELECT * FROM event
+EXCEPT
+SELECT event.*
+FROM event
+NATURAL JOIN event_artist_user
+WHERE event_artist_user.username = 12;
+</sql>
+                    </dotaz>
+                    <dotaz dotaz_id="D29">
+                        <popis_dotazu>
+                                <para>Create a view on artists whose music genre is Rock.
+Select one that was the most popular singer in this genre in the 90s</para>
+                        </popis_dotazu>
+                            <sql>create or replace view Rockstars as
+SELECT *
+FROM ARTIST_USER
+WHERE genre = &apos;Rock&apos;
+with check option;
+
+SELECT *
+FROM Rockstars
+WHERE discography = &apos;most popular rock singer in the 90s&apos;;
+
+</sql>
+                    </dotaz>
+                    <dotaz dotaz_id="D30">
+                        <popis_dotazu>
+                                <para>Select user information about all users on the platform</para>
+                        </popis_dotazu>
+                            <sql>SELECT username, full_name, mobile_phone, email, links_media
+FROM users;
+
+SELECT u.*
+FROM users u;
+
+SELECT users.username, users.full_name, users.mobile_phone, users.email, users.links_media
+FROM users;
+</sql>
+                    </dotaz>
+                    <dotaz dotaz_id="D31">
+                        <popis_dotazu>
+                                <para>Delete an artist user who was no songs</para>
+                        </popis_dotazu>
+                            <sql>DELETE FROM artist_user
+WHERE username IN (
+    SELECT artist_user.username
+    FROM artist_user
+    LEFT JOIN song_artist_user ON artist_user.username = song_artist_user.username
+    WHERE song_artist_user.username IS NULL
+);
+</sql>
+                    </dotaz>
+                    <dotaz dotaz_id="D32">
+                        <popis_dotazu>
+                                <para>Reduce the price of all merchadise products by 15%</para>
+                        </popis_dotazu>
+                            <sql>UPDATE merchandise_product
+SET product_price = (
+    SELECT new_price
+    FROM (
+        SELECT product_id, product_price * 0.85 AS new_price
+        FROM merchandise_product
+    ) AS subquery
+    WHERE subquery.product_id = merchandise_product.product_id
+);
+</sql>
+                    </dotaz>
+                    <dotaz dotaz_id="D33">
+                        <popis_dotazu>
+                                <para>Make all users with first name John become artist users on the platform</para>
+                        </popis_dotazu>
+                            <sql>INSERT INTO artist_user (username)
+SELECT username
+FROM users
+WHERE full_name LIKE &apos;John%&apos;;
+</sql>
+                    </dotaz>
+            </dotazy>
+            <pokryti_dotazu>
+                        <radek>
+                            <kategorie>A</kategorie>
+                            <odkazy>
+                                    <link url="#D3">D3</link>
+                                    <link url="#D9">D9</link>
+                                    <link url="#D13">D13</link>
+                                    <link url="#D14">D14</link>
+                                    <link url="#D15">D15</link>
+                                    <link url="#D21">D21</link>
+                                    <link url="#D22">D22</link>
+                                    <link url="#D24">D24</link>
+                                    <link url="#D26">D26</link>
+                                    <link url="#D27">D27</link>
+                                    <link url="#D28">D28</link>
+                                    <link url="#D31">D31</link>
+                            </odkazy>
+                            <kategorie_popis>A - Positive query on at least two joined tables</kategorie_popis>
+                        </radek>
+                        <radek>
+                            <kategorie>AR</kategorie>
+                            <odkazy>
+                                    <link url="#D3">D3</link>
+                                    <link url="#D9">D9</link>
+                                    <link url="#D13">D13</link>
+                                    <link url="#D14">D14</link>
+                                    <link url="#D15">D15</link>
+                                    <link url="#D26">D26</link>
+                            </odkazy>
+                            <kategorie_popis>A (RA) - Positive query on at least two joined tables</kategorie_popis>
+                        </radek>
+                        <radek>
+                            <kategorie>B</kategorie>
+                            <odkazy>
+                                    <link url="#D25">D25</link>
+                            </odkazy>
+                            <kategorie_popis>B - Negative query on at least two joined tables</kategorie_popis>
+                        </radek>
+                        <radek>
+                            <kategorie>C</kategorie>
+                            <odkazy>
+                                    <link url="#D7">D7</link>
+                                    <link url="#D11">D11</link>
+                            </odkazy>
+                            <kategorie_popis>C - Select only those related to...</kategorie_popis>
+                        </radek>
+                        <radek>
+                            <kategorie>D1</kategorie>
+                            <odkazy>
+                                    <link url="#D8">D8</link>
+                            </odkazy>
+                            <kategorie_popis>D1 - Select all related to - universal quantification query</kategorie_popis>
+                        </radek>
+                        <radek>
+                            <kategorie>D2</kategorie>
+                            <odkazy>
+                                    <link url="#D28">D28</link>
+                            </odkazy>
+                            <kategorie_popis>D2 - Result check of D1 query</kategorie_popis>
+                        </radek>
+                        <radek>
+                            <kategorie>F1</kategorie>
+                            <odkazy>
+                                    <link url="#D3">D3</link>
+                                    <link url="#D11">D11</link>
+                                    <link url="#D24">D24</link>
+                            </odkazy>
+                            <kategorie_popis>F1 - JOIN ON</kategorie_popis>
+                        </radek>
+                        <radek>
+                            <kategorie>F1R</kategorie>
+                            <odkazy>
+                                    <link url="#D3">D3</link>
+                                    <link url="#D11">D11</link>
+                            </odkazy>
+                            <kategorie_popis>F1 (RA) - JOIN ON</kategorie_popis>
+                        </radek>
+                        <radek>
+                            <kategorie>F2</kategorie>
+                            <odkazy>
+                                    <link url="#D7">D7</link>
+                                    <link url="#D9">D9</link>
+                                    <link url="#D13">D13</link>
+                                    <link url="#D14">D14</link>
+                                    <link url="#D15">D15</link>
+                                    <link url="#D26">D26</link>
+                                    <link url="#D27">D27</link>
+                                    <link url="#D28">D28</link>
+                            </odkazy>
+                            <kategorie_popis>F2 - NATURAL JOIN|JOIN USING</kategorie_popis>
+                        </radek>
+                        <radek>
+                            <kategorie>F2R</kategorie>
+                            <odkazy>
+                                    <link url="#D7">D7</link>
+                                    <link url="#D9">D9</link>
+                                    <link url="#D13">D13</link>
+                                    <link url="#D14">D14</link>
+                                    <link url="#D15">D15</link>
+                                    <link url="#D26">D26</link>
+                            </odkazy>
+                            <kategorie_popis>F2 (RA) - NATURAL JOIN|JOIN USING</kategorie_popis>
+                        </radek>
+                        <radek>
+                            <kategorie>F3</kategorie>
+                            <odkazy>
+                                    <link url="#D20">D20</link>
+                            </odkazy>
+                            <kategorie_popis>F3 - CROSS JOIN</kategorie_popis>
+                        </radek>
+                        <radek>
+                            <kategorie>F4</kategorie>
+                            <odkazy>
+                                    <link url="#D21">D21</link>
+                                    <link url="#D31">D31</link>
+                            </odkazy>
+                            <kategorie_popis>F4 - LEFT|RIGHT OUTER JOIN</kategorie_popis>
+                        </radek>
+                        <radek>
+                            <kategorie>F5</kategorie>
+                            <odkazy>
+                                    <link url="#D22">D22</link>
+                            </odkazy>
+                            <kategorie_popis>F5 - FULL (OUTER) JOIN</kategorie_popis>
+                        </radek>
+                        <radek>
+                            <kategorie>G1</kategorie>
+                            <odkazy>
+                                    <link url="#D8">D8</link>
+                                    <link url="#D18">D18</link>
+                                    <link url="#D25">D25</link>
+                                    <link url="#D31">D31</link>
+                            </odkazy>
+                            <kategorie_popis>G1 - Nested query in WHERE clause</kategorie_popis>
+                        </radek>
+                        <radek>
+                            <kategorie>G1R</kategorie>
+                            <odkazy>
+                                    <link url="#D8">D8</link>
+                                    <link url="#D25">D25</link>
+                            </odkazy>
+                            <kategorie_popis>G1 (RA) - Nested query in WHERE clause</kategorie_popis>
+                        </radek>
+                        <radek>
+                            <kategorie>G2</kategorie>
+                            <odkazy>
+                                    <link url="#D3">D3</link>
+                                    <link url="#D11">D11</link>
+                                    <link url="#D26">D26</link>
+                                    <link url="#D32">D32</link>
+                            </odkazy>
+                            <kategorie_popis>G2 - Nested query in FROM clause</kategorie_popis>
+                        </radek>
+                        <radek>
+                            <kategorie>G2R</kategorie>
+                            <odkazy>
+                                    <link url="#D3">D3</link>
+                                    <link url="#D11">D11</link>
+                                    <link url="#D26">D26</link>
+                            </odkazy>
+                            <kategorie_popis>G2 (RA) - Nested query in FROM clause</kategorie_popis>
+                        </radek>
+                        <radek>
+                            <kategorie>G3</kategorie>
+                            <odkazy>
+                                    <link url="#D27">D27</link>
+                            </odkazy>
+                            <kategorie_popis>G3 - Nested query in SELECT clause</kategorie_popis>
+                        </radek>
+                        <radek>
+                            <kategorie>G4</kategorie>
+                            <odkazy>
+                                    <link url="#D25">D25</link>
+                            </odkazy>
+                            <kategorie_popis>G4 - Correlated nested query (EXISTS|NOT EXISTS)</kategorie_popis>
+                        </radek>
+                        <radek>
+                            <kategorie>H1</kategorie>
+                            <odkazy>
+                                    <link url="#D26">D26</link>
+                            </odkazy>
+                            <kategorie_popis>H1 - Set unification - UNION</kategorie_popis>
+                        </radek>
+                        <radek>
+                            <kategorie>H2</kategorie>
+                            <odkazy>
+                                    <link url="#D7">D7</link>
+                                    <link url="#D11">D11</link>
+                                    <link url="#D14">D14</link>
+                                    <link url="#D28">D28</link>
+                            </odkazy>
+                            <kategorie_popis>H2 - Set difference - MINUS or EXCEPT</kategorie_popis>
+                        </radek>
+                        <radek>
+                            <kategorie>H2R</kategorie>
+                            <odkazy>
+                                    <link url="#D7">D7</link>
+                                    <link url="#D11">D11</link>
+                                    <link url="#D14">D14</link>
+                            </odkazy>
+                            <kategorie_popis>H2 (RA) - Set difference - MINUS or EXCEPT</kategorie_popis>
+                        </radek>
+                        <radek>
+                            <kategorie>H3</kategorie>
+                            <odkazy>
+                                    <link url="#D23">D23</link>
+                            </odkazy>
+                            <kategorie_popis>H3 - Set intersection - INTERSECT</kategorie_popis>
+                        </radek>
+                        <radek>
+                            <kategorie>I1</kategorie>
+                            <odkazy>
+                                    <link url="#D8">D8</link>
+                                    <link url="#D24">D24</link>
+                                    <link url="#D27">D27</link>
+                            </odkazy>
+                            <kategorie_popis>I1 - Aggregate functions (count|sum|min|max|avg)</kategorie_popis>
+                        </radek>
+                        <radek>
+                            <kategorie>I1R</kategorie>
+                            <odkazy>
+                                    <link url="#D8">D8</link>
+                            </odkazy>
+                            <kategorie_popis>I1 (RA) - Aggregate functions (count|sum|min|max|avg)</kategorie_popis>
+                        </radek>
+                        <radek>
+                            <kategorie>I2</kategorie>
+                            <odkazy>
+                                    <link url="#D8">D8</link>
+                                    <link url="#D24">D24</link>
+                            </odkazy>
+                            <kategorie_popis>I2 - Aggregate function over grouped rows - GROUP BY (HAVING)</kategorie_popis>
+                        </radek>
+                        <radek>
+                            <kategorie>I2R</kategorie>
+                            <odkazy>
+                                    <link url="#D8">D8</link>
+                            </odkazy>
+                            <kategorie_popis>I2 (RA) - Aggregate function over grouped rows - GROUP BY (HAVING)</kategorie_popis>
+                        </radek>
+                        <radek>
+                            <kategorie>J</kategorie>
+                            <odkazy>
+                                    <link url="#D30">D30</link>
+                            </odkazy>
+                            <kategorie_popis>J - Same query in 3 different sql statements</kategorie_popis>
+                        </radek>
+                        <radek>
+                            <kategorie>K</kategorie>
+                            <odkazy>
+                                    <link url="#D24">D24</link>
+                            </odkazy>
+                            <kategorie_popis>K - All clauses in one query - SELECT FROM WHERE GROUP BY HAVING ORDER BY</kategorie_popis>
+                        </radek>
+                        <radek>
+                            <kategorie>L</kategorie>
+                            <odkazy>
+                                    <link url="#D16">D16</link>
+                                    <link url="#D29">D29</link>
+                            </odkazy>
+                            <kategorie_popis>L - View</kategorie_popis>
+                        </radek>
+                        <radek>
+                            <kategorie>M</kategorie>
+                            <odkazy>
+                                    <link url="#D29">D29</link>
+                            </odkazy>
+                            <kategorie_popis>M - Query over a view</kategorie_popis>
+                        </radek>
+                        <radek>
+                            <kategorie>N</kategorie>
+                            <odkazy>
+                                    <link url="#D33">D33</link>
+                            </odkazy>
+                            <kategorie_popis>N - INSERT, which insert a set of rows, which are the result of another subquery (an INSERT command which has VALUES clause replaced by a nested query.</kategorie_popis>
+                        </radek>
+                        <radek>
+                            <kategorie>O</kategorie>
+                            <odkazy>
+                                    <link url="#D32">D32</link>
+                            </odkazy>
+                            <kategorie_popis>O - UPDATE with nested SELECT statement</kategorie_popis>
+                        </radek>
+                        <radek>
+                            <kategorie>P</kategorie>
+                            <odkazy>
+                                    <link url="#D31">D31</link>
+                            </odkazy>
+                            <kategorie_popis>P - DELETE with nested SELECT statement</kategorie_popis>
+                        </radek>
+            </pokryti_dotazu>
+        </queries>
+        <scripts>
+            <title>Scripts</title>
+            <para>
+                <link url="./create.sql">create.sql</link>
+            </para>
+            <para>
+                <link url="./insert.sql">insert.sql</link>
+            </para>
+        </scripts>
+        <conclussions>
+            <title>Conclusion</title>
+                    <para>During my work on this project, I learned a lot of new things and gained many new skills. Overall, I would not say that this semestral work was hard; I enjoyed doing it in many senses. The work may be a little time-consuming, but because I chose a topic I liked and was interested in, the time I spent on this work seemed to be pleasant. I also learned to use different resources to look up required information and would also like to mention that the portal we work at is really convenient.</para>
+        </conclussions>
+        <references>
+            <title>References</title>
+                    <para>[1] Courses pages of BI-DBS https://courses.fit.cvut.cz</para>
+                    <para>[2] Mockaroo Random Data Generator and API Mocking Tool https://www.mockaroo.com/</para>
+                    <para>[3]  BI-DBS proseminare a prednasky :)</para>
+        </references>
+    </content>
+</sproject>
