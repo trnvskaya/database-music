@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block title %}Home - Music Platform{% endblock %}
+
+{% block content %}
+<div class="text-center my-5">
+    <h1 class="display-4 fw-bold">
+        <i class="fas fa-music text-primary"></i> Welcome to MusicPlatform
+    </h1>
+    <p class="lead text-muted mt-3">
+        Explore artists, discover songs, and stay up-to-date with music events.
+    </p>
+    <a href="{{ url_for('artists') }}" class="btn btn-primary btn-lg mt-3">
+        <i class="fas fa-users me-2"></i> View Artists
+    </a>
+    <a href="{{ url_for('songs') }}" class="btn btn-outline-secondary btn-lg mt-3 ms-2">
+        <i class="fas fa-music me-2"></i> Browse Songs
+    </a>
+    <a href="{{ url_for('events') }}" class="btn btn-success btn-lg mt-3 ms-2">
+        <i class="fas fa-calendar me-2"></i> Upcoming Events
+    </a>
+</div>
+
+<!-- Featured section -->
+<div class="row mt-5">
+    <div class="col-md-4 mb-4">
+        <div class="card shadow-sm h-100">
+            <div class="card-body text-center">
+                <i class="fas fa-users fa-3x text-primary mb-3"></i>
+                <h5 class="card-title">Artists</h5>
+                <p class="card-text">Data comes from <code>artist_user</code> table.</p>
+                <a href="{{ url_for('artists') }}" class="btn btn-sm btn-primary">View Artists</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 mb-4">
+        <div class="card shadow-sm h-100">
+            <div class="card-body text-center">
+                <i class="fas fa-music fa-3x text-success mb-3"></i>
+                <h5 class="card-title">Songs</h5>
+                <p class="card-text">Data comes from <code>song</code> table.</p>
+                <a href="{{ url_for('songs') }}" class="btn btn-sm btn-success">Browse Songs</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 mb-4">
+        <div class="card shadow-sm h-100">
+            <div class="card-body text-center">
+                <i class="fas fa-calendar fa-3x text-danger mb-3"></i>
+                <h5 class="card-title">Events</h5>
+                <p class="card-text">Data comes from <code>event</code> table.</p>
+                <a href="{{ url_for('events') }}" class="btn btn-sm btn-danger">Upcoming Events</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
