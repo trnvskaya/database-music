@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block title %}Search - Music Platform{% endblock %}
+
+{% block content %}
+<h2>Search Results for "{{ query }}"</h2>
+
+{% if results %}
+    <h4>Artists</h4>
+    <ul>
+        {% for artist in results.artists %}
+        <li>{{ artist.username }} - {{ artist.genre }}</li>
+        {% endfor %}
+    </ul>
+
+    <h4>Songs</h4>
+    <ul>
+        {% for song in results.songs %}
+        <li>{{ song.title }} by {{ song.artist_name }}</li>
+        {% endfor %}
+    </ul>
+
+    <h4>Events</h4>
+    <ul>
+        {% for event in results.events %}
+        <li>{{ event.description }} at {{ event.location_name or 'Unknown' }} on {{ event.date }}</li>
+        {% endfor %}
+    </ul>
+
+    <h4>Playlists</h4>
+    <ul>
+        {% for playlist in results.playlists %}
+        <li>{{ playlist.name }} by {{ playlist.owner_name }}</li>
+        {% endfor %}
+    </ul>
+{% else %}
+    <p>No results found.</p>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block title %}Events - Music Platform{% endblock %}
+
+{% block content %}
+<h2 class="mb-4">Events</h2>
+
+{% if events %}
+<table class="table table-striped">
+    <thead>
+        <tr>
+            {% for col in events[0].keys() %}
+                <th>{{ col }}</th>
+            {% endfor %}
+        </tr>
+    </thead>
+    <tbody>
+        {% for event in events %}
+            <tr>
+                {% for val in event.values() %}
+                    <td>{{ val }}</td>
+                {% endfor %}
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p class="text-muted">No events found.</p>
+{% endif %}
+{% endblock %}

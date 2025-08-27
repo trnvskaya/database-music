@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block title %}Create Event - Music Platform{% endblock %}
+
+{% block content %}
+<h2>Create a New Event</h2>
+
+<form method="POST" action="{{ url_for('create_event') }}">
+    <div class="mb-3">
+        <label for="description" class="form-label">Event Description</label>
+        <textarea class="form-control" id="description" name="description" rows="3" required></textarea>
+    </div>
+
+    <div class="mb-3">
+        <label for="conditions" class="form-label">Conditions / Notes</label>
+        <textarea class="form-control" id="conditions" name="conditions" rows="2"></textarea>
+    </div>
+
+    <div class="mb-3">
+        <label for="date" class="form-label">Event Date</label>
+        <input type="date" class="form-control" id="date" name="date" required>
+    </div>
+
+    <div class="mb-3">
+        <label for="location_id" class="form-label">Location</label>
+        <select class="form-select" id="location_id" name="location_id" required>
+            <option value="" disabled selected>Select location</option>
+            {% for loc in locations %}
+                <option value="{{ loc.location_id }}">
+                    {{ loc.city }}, {{ loc.address or '' }}
+                </option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Create Event</button>
+    <a href="{{ url_for('events') }}" class="btn btn-seco_

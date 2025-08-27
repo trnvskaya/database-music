@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block title %}Merchandise - Music Platform{% endblock %}
+
+{% block content %}
+<h2>Merchandise</h2>
+
+<a href="{{ url_for('add_merchandise') }}" class="btn btn-primary mb-3">Add New Merchandise</a>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Description</th>
+            <th>Category</th>
+            <th>Price</th>
+            <th>Stock</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for product in products %}
+        <tr>
+            <td>{{ product.name }}</td>
+            <td>{{ product.description }}</td>
+            <td>{{ product.category }}</td>
+            <td>{{ product.price }}</td>
+            <td>{{ product.stock_quantity }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

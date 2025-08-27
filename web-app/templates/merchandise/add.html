@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block title %}Add Merchandise - Music Platform{% endblock %}
+
+{% block content %}
+<h2>Add New Merchandise</h2>
+
+<form method="POST" action="{{ url_for('add_merchandise') }}">
+    <div class="mb-3">
+        <label class="form-label">Name</label>
+        <input type="text" class="form-control" name="name" required>
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Description</label>
+        <textarea class="form-control" name="description" rows="3"></textarea>
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Category</label>
+        <input type="text" class="form-control" name="category">
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Price</label>
+        <input type="number" class="form-control" name="price" step="0.01" required>
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Stock Quantity</label>
+        <input type="number" class="form-control" name="stock_quantity" required>
+    </div>
+    <button type="submit" class="btn btn-primary">Add Merchandise</button>
+</form>
+{% endblock %}

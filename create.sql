@@ -48,10 +48,10 @@ select remove_all();
 
 CREATE TABLE artist_user (
     username SERIAL NOT NULL,
-    manager_user_username SERIAL NOT NULL,
-    discography VARCHAR(80) NOT NULL,
-    biography VARCHAR(80) NOT NULL,
-    genre VARCHAR(20) NOT NULL,
+    manager_user_username SERIAL,
+    discography VARCHAR(80) ,
+    biography VARCHAR(80),
+    genre VARCHAR(20),
     photos VARCHAR(256)
 );
 ALTER TABLE artist_user ADD CONSTRAINT pk_artist_user PRIMARY KEY (username);
@@ -59,10 +59,10 @@ ALTER TABLE artist_user ADD CONSTRAINT pk_artist_user PRIMARY KEY (username);
 CREATE TABLE basic_user (
     username SERIAL NOT NULL,
     basic_user_username INTEGER,
-    birth_date DATE NOT NULL,
-    preferences VARCHAR(256) NOT NULL,
-    profile_description VARCHAR(256) NOT NULL,
-    credit_card VARCHAR(20) NOT NULL,
+    birth_date DATE,
+    preferences VARCHAR(256),
+    profile_description VARCHAR(256),
+    credit_card VARCHAR(20),
     subscription_type VARCHAR(256),
     subscription_price FLOAT,
     subscription_date DATE,
@@ -141,12 +141,15 @@ ALTER TABLE song ADD CONSTRAINT pk_song PRIMARY KEY (song_id);
 
 CREATE TABLE users (
     username SERIAL NOT NULL,
-    full_name VARCHAR(40) NOT NULL,
+    full_name VARCHAR(40),
     mobile_phone VARCHAR(15),
     email VARCHAR(50) NOT NULL,
-    links_media VARCHAR(100)
+    links_media VARCHAR(100),
+    password_hash VARCHAR(256) NOT NULL -- Add this line
 );
+
 ALTER TABLE users ADD CONSTRAINT pk_user PRIMARY KEY (username);
+
 
 CREATE TABLE event_artist_user (
     event_id SERIAL NOT NULL,
