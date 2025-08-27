@@ -46,7 +46,7 @@
 
                 <!-- Right side of navbar -->
                 <ul class="navbar-nav">
-                    {% if session.get('user_id') %}
+                    {% if session.get('username') %}
                         <li class="nav-item">
                             <a class="nav-link" href="{{ url_for('profile') }}">
                                 <i class="fas fa-user me-1"></i>Profile

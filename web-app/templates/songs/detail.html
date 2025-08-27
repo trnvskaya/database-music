@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block title %}{{ song.name if song else 'Song' }} - Music Platform{% endblock %}
+
+{% block content %}
+{% if song %}
+    <h2>{{ song.name }}</h2>
+
+    {% if artists %}
+    <p><strong>Artist(s):</strong>
+        {% for artist in artists %}
+            {{ artist.artist_name }}{% if not loop.last %}, {% endif %}
+        {% endfor %}
+    </p>
+    {% else %}
+    <p><strong>Artist(s):</strong> Unknown</p>
+    {% endif %}
+
+    {% if song.lyrics %}
+    <h4>Lyrics:</h4>
+    <pre>{{ song.lyrics }}</pre>
+    {% else %}
+    <p><em>No lyrics available.</em></p>
+    {% endif %}
+
+{% else %}
+    <p class="text-muted">Song not found.</p>
+{% endif %}
+{% endblock %}

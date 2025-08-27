@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}Profile - Music Platform{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-body">
+                    <h2 class="card-title text-center mb-4">Your Profile</h2>
+
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                        {% if messages %}
+                            {% for category, message in messages %}
+                                <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                                    {{ message }}
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+                    {% endwith %}
+
+                    <ul class="list-group list-group-flush mb-3">
+                        <li class="list-group-item"><strong>Full Name:</strong> {{ user.full_name }}</li>
+                        <li class="list-group-item"><strong>Email:</strong> {{ user.email }}</li>
+                        <li class="list-group-item"><strong>Username (ID):</strong> {{ user.username }}</li>
+                        <li class="list-group-item"><strong>User Type:</strong> {{ session.get('user_type', 'basic') }}</li>
+                    </ul>
+
+                    {% if session.get('user_type') == 'artist' %}
+                        <a href="{{ url_for('add_song') }}" class="btn btn-success mb-4">Add New Song</a>
+
+                        {% if artist_songs %}
+                            <h4>Your Songs</h4>
+                            <ul class="list-group mb-3">
+                                {% for song in artist_songs %}
+                                    <li class="list-group-item">
+                                        <a href="{{ url_for('song_detail', song_id=song.song_id) }}">
+                                            {{ song.name }}
+                                        </a>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        {% else %}
+                            <p class="text-muted">You have not added any songs yet.</p>
+                        {% endif %}
+                    {% endif %}
+
+                    <div class="mt-4 text-center">
+                        <a href="{{ url_for('index') }}" class="btn btn-primary">Back to Home</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

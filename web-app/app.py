@@ -49,12 +49,12 @@ def require_login():
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
-        username = request.form['username'].strip()
+        full_name = request.form['full_name'].strip()
         email = request.form['email'].strip()
         password = request.form['password']
         user_type = request.form.get('user_type', 'basic').strip()
 
-        if not username or not email or not password:
+        if not full_name or not email or not password:
             flash('All fields are required', 'error')
             return render_template('auth/register.html')
 
@@ -66,26 +66,46 @@ def register():
         try:
             cur = conn.cursor(cursor_factory=RealDictCursor)
 
-            # Check for existing username/email
-            cur.execute('SELECT username FROM users WHERE username = %s OR email = %s', (username, email))
+            # Check if email exists
+            cur.execute('SELECT username FROM users WHERE email = %s', (email,))
             if cur.fetchone():
-                flash('Username or email already exists', 'error')
+                flash('Email already exists', 'error')
                 return render_template('auth/register.html')
 
-            # Insert new user
+            # Insert new user; username is auto-generated SERIAL
             hashed_password = generate_password_hash(password)
             cur.execute('''
-                INSERT INTO users (username, full_name, email, password_hash)
-                VALUES (%s, %s, %s, %s)
-            ''', (username, username, email, hashed_password))
+                INSERT INTO users (full_name, email, password_hash)
+                VALUES (%s, %s, %s)
+                RETURNING username
+            ''', (full_name, email, hashed_password))
+            new_user = cur.fetchone()
+            username = new_user['username']  # numeric SERIAL
 
             # Create specific user type record
             if user_type == 'basic':
-                cur.execute('INSERT INTO basic_user (username) VALUES (%s)', (username,))
+                cur.execute('''
+                INSERT INTO basic_user (username, birth_date, preferences, profile_description, credit_card)
+                VALUES (%s, CURRENT_DATE, %s, %s, %s)
+                ''', (username, '', '', ''))
+
             elif user_type == 'artist':
-                cur.execute('INSERT INTO artist_user (username) VALUES (%s)', (username,))
+                cur.execute('''
+                INSERT INTO artist_user (username, discography, biography, genre)
+                VALUES (%s, %s, %s, %s)
+                ''', (username, '', '', ''))
+
             elif user_type == 'manager':
-                cur.execute('INSERT INTO manager_user (username) VALUES (%s)', (username,))
+                cur.execute('''
+                INSERT INTO manager_user (username, role_for_artist, tasks)
+                VALUES (%s, %s, %s)
+                ''', (username, '', ''))
+
+            elif user_type == 'content_moderator':
+                cur.execute('''
+                INSERT INTO content_moderator_user (username, tasks, moderation_history)
+                VALUES (%s, %s, %s)
+                ''', (username, '', ''))
 
             conn.commit()
             flash('Registration successful! Please log in.', 'success')
@@ -100,13 +120,10 @@ def register():
     return render_template('auth/register.html')
 
 
-
-
-
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        username = request.form['username'].strip()
+        email = request.form['email'].strip()
         password = request.form['password']
 
         conn = get_db_connection()
@@ -117,18 +134,28 @@ def login():
         try:
             cur = conn.cursor(cursor_factory=RealDictCursor)
             cur.execute('''
-                SELECT username, password_hash
-                FROM users
-                WHERE username = %s
-            ''', (username,))
+    SELECT username, full_name, email, password_hash,
+           CASE
+               WHEN EXISTS (SELECT 1 FROM artist_user WHERE username = users.username) THEN 'artist'
+               WHEN EXISTS (SELECT 1 FROM manager_user WHERE username = users.username) THEN 'manager'
+               WHEN EXISTS (SELECT 1 FROM content_moderator_user WHERE username = users.username) THEN 'content_moderator'
+               ELSE 'basic'
+           END AS user_type
+    FROM users
+    WHERE email = %s
+''', (email,))
             user = cur.fetchone()
+
 
             if user and check_password_hash(user['password_hash'], password):
                 session['username'] = user['username']
-                flash(f'Welcome back, {username}!', 'success')
+                session['full_name'] = user['full_name']
+                session['email'] = user['email']
+                session['user_type'] = user['user_type']  # <-- important!
+                flash(f"Welcome back, {user['full_name']}!", 'success')
                 return redirect(url_for('index'))
             else:
-                flash('Invalid username or password', 'error')
+                flash('Invalid email or password', 'error')
 
         except psycopg2.Error as e:
             flash(f'Login failed: {e}', 'error')
@@ -139,11 +166,14 @@ def login():
 
 
 
+
+
 @app.route('/logout')
 def logout():
     session.clear()
     flash('You have been logged out', 'info')
     return redirect(url_for('index'))
+
 
 
 
@@ -193,45 +223,31 @@ def index():
 
 
 
-@app.route('/dashboard')
-def dashboard():
-    if not is_logged_in():
+@app.route('/profile')
+def profile():
+    if 'username' not in session:
+        flash('You must be logged in to view your profile.', 'error')
         return redirect(url_for('login'))
-    
+
     conn = get_db_connection()
-    if not conn:
-        flash('Database connection failed', 'error')
-        return render_template('dashboard.html')
-    
-    try:
-        cur = conn.cursor()
-        user_data = {}
-        
-        # Get user's playlists
+    cur = conn.cursor(cursor_factory=RealDictCursor)
+    cur.execute('SELECT * FROM users WHERE username = %s', (session['username'],))
+    user = cur.fetchone()
+
+    artist_songs = []
+    if session.get('user_type') == 'artist':
         cur.execute('''
-            SELECT * FROM playlist WHERE basic_user_username = 
-            (SELECT basic_user_username FROM basic_user WHERE username = %s)
+            SELECT s.song_id, s.name 
+            FROM song s
+            JOIN song_artist_user sau ON s.song_id = sau.song_id
+            WHERE sau.username = %s
         ''', (session['username'],))
-        user_data['playlists'] = cur.fetchall()
-        
-        # Get user's events (if artist)
-        if session['user_type'] == 'artist':
-            cur.execute('''
-                SELECT e.*, l.address, l.city, l.region, l.country 
-                FROM event e 
-                LEFT JOIN location l ON e.location_id = l.location_id 
-                JOIN event_artist_user eau ON e.event_id = eau.event_id 
-                WHERE eau.username = (SELECT username FROM artist_user WHERE username = %s)
-            ''', (session['username'],))
-            user_data['my_events'] = cur.fetchall()
-        
-        conn.close()
-        return render_template('dashboard.html', user_data=user_data)
-        
-    except psycopg2.Error as e:
-        flash(f'Dashboard error: {e}', 'error')
-        conn.close()
-        return render_template('dashboard.html', user_data={})
+        artist_songs = cur.fetchall()
+
+    conn.close()
+    return render_template('auth/profile.html', user=user, artist_songs=artist_songs)
+
+
 
 
 
@@ -350,47 +366,78 @@ def songs():
         return render_template('songs/list.html', songs=[])
 
 
+@app.route('/song/<int:song_id>')
+def song_detail(song_id):
+    conn = get_db_connection()
+    try:
+        cur = conn.cursor(cursor_factory=RealDictCursor)
+
+        # Get song info
+        cur.execute('SELECT song_id, name, lyrics FROM song WHERE song_id = %s', (song_id,))
+        song = cur.fetchone()
+
+        # Get artists
+        cur.execute('''
+            SELECT u.full_name AS artist_name, au.username AS artist_username
+            FROM song_artist_user sau
+            JOIN artist_user au ON sau.username = au.username
+            JOIN users u ON au.username = u.username
+            WHERE sau.song_id = %s
+        ''', (song_id,))
+        artists = cur.fetchall()
+
+        conn.close()
+        return render_template('songs/detail.html', song=song, artists=artists)
+    except psycopg2.Error as e:
+        flash(f'Error loading song: {e}', 'error')
+        conn.close()
+        return render_template('songs/detail.html', song=None, artists=[])
+
+
+
+
+
 @app.route('/add_song', methods=['GET', 'POST'])
 def add_song():
-    login_check = require_login()
-    if login_check:
-        return login_check
-    
+    # Only allow logged-in artists
+    if 'username' not in session or session.get('user_type') != 'artist':
+        flash('You must be logged in as an artist to add a song.', 'error')
+        return redirect(url_for('login'))
+
     if request.method == 'POST':
-        name = request.form['name']
-        lyrics = request.form.get('lyrics', '')
-        
+        name = request.form['name'].strip()
+        lyrics = request.form.get('lyrics', '').strip()
+
+        if not name:
+            flash('Song name is required.', 'error')
+            return render_template('songs/add.html')
+
         conn = get_db_connection()
         if not conn:
             flash('Database connection failed', 'error')
             return render_template('songs/add.html')
-        
+
         try:
-            cur = conn.cursor(cursor_factory=RealDictCursor)  # Use RealDictCursor
-            cur.execute('''
-                INSERT INTO song (name, lyrics) 
-                VALUES (%s, %s) RETURNING song_id
-            ''', (name, lyrics))
-            
+            cur = conn.cursor(cursor_factory=RealDictCursor)
+            # Add song
+            cur.execute('INSERT INTO song (name, lyrics) VALUES (%s, %s) RETURNING song_id',
+                        (name, lyrics))
             song_id = cur.fetchone()['song_id']
-            
-            # Associate song with artist if current user is an artist
-            if session.get('user_type') == 'artist':
-                cur.execute('''
-                    INSERT INTO song_artist_user (song_id, username) 
-                    VALUES (%s, %s)
-                ''', (song_id, session['username']))
-            
+
+            # Associate with current artist
+            cur.execute('INSERT INTO song_artist_user (song_id, username) VALUES (%s, %s)',
+                        (song_id, session['username']))
+
             conn.commit()
-            conn.close()
-            
             flash('Song added successfully!', 'success')
             return redirect(url_for('songs'))
-            
+
         except psycopg2.Error as e:
             flash(f'Error adding song: {e}', 'error')
+            conn.rollback()
+        finally:
             conn.close()
-    
+
     return render_template('songs/add.html')
 
 
@@ -566,7 +613,11 @@ def add_song_to_playlist():
 
 
 
+
+
+
 # ==================== EVENT ROUTES ====================
+
 
 
 
@@ -586,7 +637,6 @@ def events():
                    l.country, l.region, l.city, l.address
             FROM event e
             LEFT JOIN location l ON e.location_id = l.location_id
-            WHERE e.date >= CURRENT_DATE
             ORDER BY e.date ASC
         ''')
         events = cur.fetchall()
@@ -597,6 +647,42 @@ def events():
         flash(f'Error loading events: {e}', 'error')
         conn.close()
         return render_template('events/list.html', events=[])
+
+
+
+
+@app.route('/events/<int:event_id>')
+def event_detail(event_id):
+    conn = get_db_connection()
+    if not conn:
+        flash("Database connection failed", "error")
+        return redirect(url_for('events'))
+
+    try:
+        cur = conn.cursor(cursor_factory=RealDictCursor)
+        cur.execute('''
+            SELECT e.event_id, e.description, e.date, e.conditions,
+                   l.country, l.region, l.city, l.address
+            FROM event e
+            LEFT JOIN location l ON e.location_id = l.location_id
+            WHERE e.event_id = %s
+        ''', (event_id,))
+        event = cur.fetchone()
+        conn.close()
+
+        if not event:
+            flash("Event not found", "error")
+            return redirect(url_for('events'))
+
+        return render_template('events/detail.html', event=event)
+
+    except psycopg2.Error as e:
+        flash(f"Error loading event: {e}", "error")
+        conn.close()
+        return redirect(url_for('events'))
+
+
+
 
 
 @app.route('/create_event', methods=['GET', 'POST'])
