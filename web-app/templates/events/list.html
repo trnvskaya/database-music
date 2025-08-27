@@ -9,17 +9,25 @@
 <table class="table table-striped">
     <thead>
         <tr>
-            {% for col in events[0].keys() %}
-                <th>{{ col }}</th>
-            {% endfor %}
+            <th>Description</th>
+            <th>Date</th>
+            <th>Location</th>
+            <th>Conditions</th>
         </tr>
     </thead>
     <tbody>
         {% for event in events %}
             <tr>
-                {% for val in event.values() %}
-                    <td>{{ val }}</td>
-                {% endfor %}
+                <td>
+                    <a href="{{ url_for('event_detail', event_id=event['event_id']) }}">
+                        {{ event['description'] }}
+                    </a>
+                </td>
+                <td>{{ event['date'] }}</td>
+                <td>
+                    {{ event['country'] or '' }}, {{ event['region'] or '' }}, {{ event['city'] or '' }}, {{ event['address'] or '' }}
+                </td>
+                <td>{{ event['conditions'] or 'N/A' }}</td>
             </tr>
         {% endfor %}
     </tbody>

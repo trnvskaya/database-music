@@ -3,20 +3,18 @@
 {% block title %}Add Song - Music Platform{% endblock %}
 
 {% block content %}
-<h2>Add a New Song</h2>
-
-<form method="POST" action="{{ url_for('add_song') }}">
-    <div class="mb-3">
-        <label for="name" class="form-label">Song Name</label>
-        <input type="text" class="form-control" id="name" name="name" required>
-    </div>
-    
-    <div class="mb-3">
-        <label for="lyrics" class="form-label">Lyrics (optional)</label>
-        <textarea class="form-control" id="lyrics" name="lyrics" rows="5"></textarea>
-    </div>
-    
-    <button type="submit" class="btn btn-primary">Add Song</button>
-    <a href="{{ url_for('songs') }}" class="btn btn-secondary">Cancel</a>
-</form>
+<div class="container mt-4">
+    <h2>Add New Song</h2>
+    <form method="POST">
+        <div class="mb-3">
+            <label for="name" class="form-label">Song Name</label>
+            <input type="text" class="form-control" id="name" name="name" required>
+        </div>
+        <div class="mb-3">
+            <label for="lyrics" class="form-label">Lyrics (optional)</label>
+            <textarea class="form-control" id="lyrics" name="lyrics" rows="4"></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary">Add Song</button>
+    </form>
+</div>
 {% endblock %}

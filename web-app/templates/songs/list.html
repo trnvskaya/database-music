@@ -9,17 +9,21 @@
 <table class="table table-striped">
     <thead>
         <tr>
-            {% for col in songs[0].keys() %}
-                <th>{{ col }}</th>
-            {% endfor %}
+            <th>Song Name</th>
+            <th>Artist</th>
         </tr>
     </thead>
     <tbody>
         {% for song in songs %}
             <tr>
-                {% for val in song.values() %}
-                    <td>{{ val }}</td>
-                {% endfor %}
+                <td>
+                    <a href="{{ url_for('song_detail', song_id=song.song_id) }}">
+                        {{ song.name }}
+                    </a>
+                </td>
+                <td>
+                    {{ song.artist_name or 'Unknown' }}
+                </td>
             </tr>
         {% endfor %}
     </tbody>

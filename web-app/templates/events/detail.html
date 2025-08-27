@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block title %}{{ event.description if event else 'Event' }} - Music Platform{% endblock %}
+
+{% block content %}
+{% if event %}
+<h2>{{ event.description }}</h2>
+
+<p><strong>Date:</strong> {{ event.date }}</p>
+<p><strong>Location:</strong>
+    {{ event.country or '' }}, {{ event.region or '' }}, {{ event.city or '' }}, {{ event.address or '' }}
+</p>
+<p><strong>Conditions:</strong> {{ event.conditions or 'N/A' }}</p>
+
+<a href="{{ url_for('events') }}" class="btn btn-secondary mt-3">Back to Events</a>
+
+{% else %}
+<p class="text-muted">Event not found.</p>
+<a href="{{ url_for('events') }}" class="btn btn-secondary mt-3">Back to Events</a>
+{% endif %}
+{% endblock %}
