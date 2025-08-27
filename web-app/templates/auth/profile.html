@@ -27,6 +27,10 @@
                         <li class="list-group-item"><strong>User Type:</strong> {{ session.get('user_type', 'basic') }}</li>
                     </ul>
 
+                    {% if session.get('user_type') in ['artist', 'manager'] %}
+                        <a href="{{ url_for('create_event') }}" class="btn btn-warning mb-3">Create Event</a>
+                    {% endif %}
+
                     {% if session.get('user_type') == 'artist' %}
                         <a href="{{ url_for('add_song') }}" class="btn btn-success mb-4">Add New Song</a>
 

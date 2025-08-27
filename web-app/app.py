@@ -699,17 +699,26 @@ def create_event():
 
     conn = get_db_connection()
     if not conn:
+        flash('Database connection failed', 'error')
         return render_template('events/create.html', locations=[])
 
     try:
         cur = conn.cursor(cursor_factory=RealDictCursor)
 
+        # Get locations for dropdown (needed for both GET and POST)
+        cur.execute('SELECT location_id, country, region, city, address FROM location ORDER BY city')
+        locations = cur.fetchall()
+
         # Handle form submission
         if request.method == 'POST':
-            description = request.form.get('description', '')
+            description = request.form.get('description', '').strip()
             date = request.form.get('date')
-            conditions = request.form.get('conditions', '')
+            conditions = request.form.get('conditions', '').strip()
             location_id = request.form.get('location_id')
+
+            if not description or not date or not location_id:
+                flash('Please fill in all required fields.', 'error')
+                return render_template('events/create.html', locations=locations)
 
             # Insert event
             cur.execute('''
@@ -719,172 +728,169 @@ def create_event():
             
             event_id = cur.fetchone()['event_id']
 
-            # Associate event with artist if user is an artist
+            # Associate event with artist if current user is an artist
             if session.get('user_type') == 'artist':
                 cur.execute('''
                     INSERT INTO event_artist_user (event_id, artist_user_id) 
-                    SELECT %s, event_id FROM artist_user WHERE username = %s
+                    SELECT %s, username FROM artist_user WHERE username = %s
                 ''', (event_id, session['username']))
 
             conn.commit()
-            conn.close()
-
             flash('Event created successfully!', 'success')
             return redirect(url_for('events'))
 
-        # Get locations for dropdown
-        cur.execute('SELECT location_id, country, region, city, address FROM location ORDER BY city')
-        locations = cur.fetchall()
-        conn.close()
-
+        # GET request renders form
         return render_template('events/create.html', locations=locations)
 
     except psycopg2.Error as e:
         flash(f'Error creating event: {e}', 'error')
-        conn.close()
-        return render_template('events/create.html', locations=[])
+        return render_template('events/create.html', locations=locations)
 
-
-
-
-
-# ==================== MERCHANDISE ROUTES ====================
-
-
-@app.route('/merchandise')
-def merchandise():
-    conn = get_db_connection()
-    if not conn:
-        return render_template('merchandise/list.html', products=[])
-    
-    try:
-        cur = conn.cursor(cursor_factory=RealDictCursor)
-        cur.execute('SELECT * FROM merchandise_product ORDER BY name')
-        products = cur.fetchall()
-        conn.close()
-        return render_template('merchandise/list.html', products=products)
-        
-    except psycopg2.Error as e:
-        flash(f'Error loading merchandise: {e}', 'error')
-        conn.close()
-        return render_template('merchandise/list.html', products=[])
-
-
-@app.route('/add_merchandise', methods=['GET', 'POST'])
-def add_merchandise():
-    login_check = require_login()
-    if login_check:
-        return login_check
-    
-    if session.get('user_type') not in ['artist', 'manager']:
-        flash('Only artists and managers can add merchandise', 'error')
-        return redirect(url_for('merchandise'))
-    
-    if request.method == 'POST':
-        name = request.form['name']
-        description = request.form.get('description', '')
-        price = request.form['price']
-        stock_quantity = request.form['stock_quantity']
-        category = request.form.get('category', '')
-
-        conn = get_db_connection()
-        if not conn:
-            flash('Database connection failed', 'error')
-            return render_template('merchandise/add.html')
-        
-        try:
-            cur = conn.cursor()
-            cur.execute('''
-                INSERT INTO merchandise_product (name, description, price, stock_quantity, category, created_at)
-                VALUES (%s, %s, %s, %s, %s, %s)
-            ''', (name, description, price, stock_quantity, category, datetime.now()))
-            
-            conn.commit()
+    finally:
+        if conn:
             conn.close()
-            
-            flash('Merchandise added successfully!', 'success')
-            return redirect(url_for('merchandise'))
-            
-        except psycopg2.Error as e:
-            flash(f'Error adding merchandise: {e}', 'error')
-            conn.close()
+
+
+
+
+
+# # ==================== MERCHANDISE ROUTES ====================
+
+
+# @app.route('/merchandise')
+# def merchandise():
+#     conn = get_db_connection()
+#     if not conn:
+#         return render_template('merchandise/list.html', products=[])
     
-    return render_template('merchandise/add.html')
+#     try:
+#         cur = conn.cursor(cursor_factory=RealDictCursor)
+#         cur.execute('SELECT * FROM merchandise_product ORDER BY name')
+#         products = cur.fetchall()
+#         conn.close()
+#         return render_template('merchandise/list.html', products=products)
+        
+#     except psycopg2.Error as e:
+#         flash(f'Error loading merchandise: {e}', 'error')
+#         conn.close()
+#         return render_template('merchandise/list.html', products=[])
+
+
+# @app.route('/add_merchandise', methods=['GET', 'POST'])
+# def add_merchandise():
+#     login_check = require_login()
+#     if login_check:
+#         return login_check
+    
+#     if session.get('user_type') not in ['artist', 'manager']:
+#         flash('Only artists and managers can add merchandise', 'error')
+#         return redirect(url_for('merchandise'))
+    
+#     if request.method == 'POST':
+#         name = request.form['name']
+#         description = request.form.get('description', '')
+#         price = request.form['price']
+#         stock_quantity = request.form['stock_quantity']
+#         category = request.form.get('category', '')
+
+#         conn = get_db_connection()
+#         if not conn:
+#             flash('Database connection failed', 'error')
+#             return render_template('merchandise/add.html')
+        
+#         try:
+#             cur = conn.cursor()
+#             cur.execute('''
+#                 INSERT INTO merchandise_product (name, description, price, stock_quantity, category, created_at)
+#                 VALUES (%s, %s, %s, %s, %s, %s)
+#             ''', (name, description, price, stock_quantity, category, datetime.now()))
+            
+#             conn.commit()
+#             conn.close()
+            
+#             flash('Merchandise added successfully!', 'success')
+#             return redirect(url_for('merchandise'))
+            
+#         except psycopg2.Error as e:
+#             flash(f'Error adding merchandise: {e}', 'error')
+#             conn.close()
+    
+#     return render_template('merchandise/add.html')
 
 
 
-# ==================== SEARCH ROUTE ====================
+# # ==================== SEARCH ROUTE ====================
 
 
 
 
-@app.route('/search')
-def search():
-    query = request.args.get('q', '').strip()
-    if not query:
-        return render_template('search.html', results=None, query='')
+# @app.route('/search')
+# def search():
+#     query = request.args.get('q', '').strip()
+#     if not query:
+#         return render_template('search.html', results=None, query='')
 
-    conn = get_db_connection()
-    if not conn:
-        flash('Database connection failed', 'error')
-        return render_template('search.html', results=None, query=query)
+#     conn = get_db_connection()
+#     if not conn:
+#         flash('Database connection failed', 'error')
+#         return render_template('search.html', results=None, query=query)
 
-    try:
-        cur = conn.cursor(cursor_factory=RealDictCursor)
-        search_pattern = f'%{query}%'
-        results = {
-            'artists': [],
-            'songs': [],
-            'events': [],
-            'playlists': []
-        }
+#     try:
+#         cur = conn.cursor(cursor_factory=RealDictCursor)
+#         search_pattern = f'%{query}%'
+#         results = {
+#             'artists': [],
+#             'songs': [],
+#             'events': [],
+#             'playlists': []
+#         }
 
-        # Search artists
-        cur.execute('''
-            SELECT u.username, au.genre, au.biography 
-            FROM users u
-            JOIN artist_user au ON u.username = au.username
-            WHERE u.username ILIKE %s OR au.genre ILIKE %s OR au.biography ILIKE %s
-        ''', (search_pattern, search_pattern, search_pattern))
-        results['artists'] = cur.fetchall()
+#         # Search artists
+#         cur.execute('''
+#             SELECT u.username, au.genre, au.biography 
+#             FROM users u
+#             JOIN artist_user au ON u.username = au.username
+#             WHERE u.username ILIKE %s OR au.genre ILIKE %s OR au.biography ILIKE %s
+#         ''', (search_pattern, search_pattern, search_pattern))
+#         results['artists'] = cur.fetchall()
 
-        # Search songs
-        cur.execute('''
-            SELECT s.name AS title, u.username AS artist_name
-            FROM song s
-            JOIN song_artist_user sau ON s.song_id = sau.song_id
-            JOIN artist_user au ON sau.username = au.username
-            JOIN users u ON au.username = u.username
-            WHERE s.name ILIKE %s
-        ''', (search_pattern,))
-        results['songs'] = cur.fetchall()
+#         # Search songs
+#         cur.execute('''
+#             SELECT s.name AS title, u.username AS artist_name
+#             FROM song s
+#             JOIN song_artist_user sau ON s.song_id = sau.song_id
+#             JOIN artist_user au ON sau.username = au.username
+#             JOIN users u ON au.username = u.username
+#             WHERE s.name ILIKE %s
+#         ''', (search_pattern,))
+#         results['songs'] = cur.fetchall()
 
-        # Search events
-        cur.execute('''
-            SELECT e.event_id, e.description, e.date, l.city AS location_name
-            FROM event e
-            LEFT JOIN location l ON e.location_id = l.location_id
-            WHERE e.description ILIKE %s
-        ''', (search_pattern,))
-        results['events'] = cur.fetchall()
+#         # Search events
+#         cur.execute('''
+#             SELECT e.event_id, e.description, e.date, l.city AS location_name
+#             FROM event e
+#             LEFT JOIN location l ON e.location_id = l.location_id
+#             WHERE e.description ILIKE %s
+#         ''', (search_pattern,))
+#         results['events'] = cur.fetchall()
 
-        # Search playlists (public only)
-        cur.execute('''
-            SELECT p.playlist_id, p.name, u.username AS owner_name
-            FROM playlist p
-            JOIN basic_user bu ON p.basic_user_id = bu.basic_user_id
-            JOIN users u ON bu.username = u.username
-            WHERE p.is_public = TRUE AND p.name ILIKE %s
-        ''', (search_pattern,))
-        results['playlists'] = cur.fetchall()
+#         # Search playlists (public only)
+#         cur.execute('''
+#             SELECT p.playlist_id, p.name, u.username AS owner_name
+#             FROM playlist p
+#             JOIN basic_user bu ON p.basic_user_id = bu.basic_user_id
+#             JOIN users u ON bu.username = u.username
+#             WHERE p.is_public = TRUE AND p.name ILIKE %s
+#         ''', (search_pattern,))
+#         results['playlists'] = cur.fetchall()
 
-        conn.close()
-        return render_template('search.html', results=results, query=query)
+#         conn.close()
+#         return render_template('search.html', results=results, query=query)
 
-    except psycopg2.Error as e:
-        flash(f'Search error: {e}', 'error')
-        conn.close()
-        return render_template('search.html', results=None, query=query)
+#     except psycopg2.Error as e:
+#         flash(f'Search error: {e}', 'error')
+#         conn.close()
+#         return render_template('search.html', results=None, query=query)
 
 
 
