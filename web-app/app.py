@@ -31,7 +31,7 @@ def get_db_connection():
 
 def is_logged_in():
     """Check if user is logged in"""
-    return 'user_id' in session
+    return 'username' in session
 
 def require_login():
     if not is_logged_in():
