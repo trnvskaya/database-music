@@ -105,46 +105,126 @@ insert into song (song_id, name) values (20, 'snot');
 SELECT SETVAL(PG_GET_SERIAL_SEQUENCE('song', 'song_id'), 20);
 
 
-insert into users (username, full_name, mobile_phone, email, links_media) values (1, 'Ingra Pettendrich', '325-705-7937', 'ipettendrich0@sciencedaily.com', 'http://admin.ch');
-insert into users (username, full_name, mobile_phone, email, links_media) values (2, 'Heather Ganley', '989-869-0284', 'hganley1@eventbrite.com', 'https://bbb.org');
-insert into users (username, full_name, mobile_phone, email, links_media) values (3, 'Hart Winteringham', '334-425-1920', 'hwinteringham2@nationalgeographic.com', 'http://free.fr');
-insert into users (username, full_name, mobile_phone, email, links_media) values (4, 'Griffy Gosselin', '428-787-9863', 'ggosselin3@ocn.ne.jp', 'http://desdev.cn');
-insert into users (username, full_name, mobile_phone, email, links_media) values (5, 'Marcelo Tift', '389-256-1851', 'mtift4@yahoo.co.jp', 'http://skype.com');
-insert into users (username, full_name, mobile_phone, email, links_media) values (6, 'Dorie Londesborough', '834-492-1701', 'dlondesborough5@imgur.com', 'https://noaa.gov');
-insert into users (username, full_name, mobile_phone, email, links_media) values (7, 'Bartolomeo Knath', '207-381-8598', 'bknath6@statcounter.com', 'https://ibm.com');
-insert into users (username, full_name, mobile_phone, email, links_media) values (8, 'Ferdy Kalderon', '138-704-1462', 'fkalderon7@hhs.gov', 'http://wired.com');
-insert into users (username, full_name, mobile_phone, email, links_media) values (9, 'Osmond Matiebe', '563-621-6241', 'omatiebe8@xrea.com', 'https://istockphoto.com');
-insert into users (username, full_name, mobile_phone, email, links_media) values (10, 'Rex Witz', '536-916-1107', 'rwitz9@opera.com', 'http://fema.gov');
-insert into users (username, full_name, mobile_phone, email, links_media) values (11, 'Static-X', '999-121-9718', 'csedena@sfgate.com', 'http://wiley.com');
-insert into users (username, full_name, mobile_phone, email, links_media) values (12, 'Hannah Jackson', '667-381-7995', 'gveltib@edublogs.org', 'http://twitpic.com');
-insert into users (username, full_name, mobile_phone, email, links_media) values (13, 'The Beatles', '580-698-4740', 'jillistonc@virginia.edu', 'http://discuz.net');
-insert into users (username, full_name, mobile_phone, email, links_media) values (14, 'Valerie Theriot', '927-674-0266', 'vtheriotd@webeden.co.uk', 'http://dropbox.com');
-insert into users (username, full_name, mobile_phone, email, links_media) values (15, 'Courtnay Bartosik', '273-351-8347', 'cbartosike@hao123.com', 'http://sogou.com');
-insert into users (username, full_name, mobile_phone, email, links_media) values (16, 'Mar Farthing', '715-374-5966', 'mfarthingf@zimbio.com', 'http://exblog.jp');
-insert into users (username, full_name, mobile_phone, email, links_media) values (17, 'Adriena Nekrews', '904-935-3398', 'anekrewsg@fda.gov', 'https://google.nl');
-insert into users (username, full_name, mobile_phone, email, links_media) values (18, 'Natale Duthie', '178-207-8539', 'nduthieh@nymag.com', 'http://hhs.gov');
-insert into users (username, full_name, mobile_phone, email, links_media) values (19, 'Reagen Harrema', '531-293-2272', 'rharremai@tumblr.com', 'http://marketwatch.com');
-insert into users (username, full_name, mobile_phone, email, links_media) values (20, 'Hannah Jacksons', '265-769-3132', 'tbutteryj@chron.com', 'http://flickr.com');
-insert into users (username, full_name, mobile_phone, email, links_media) values (21, 'mariia123', '633-534-0875', 'lleasek@pinterest.com', 'http://twitpic.com');
-insert into users (username, full_name, mobile_phone, email, links_media) values (22, 'Mariia Ternavska', '263-840-2643', 'helkingtonl@engadget.com', 'http://dropbox.com');
-insert into users (username, full_name, mobile_phone, email, links_media) values (23, 'Phaidra Faull', '845-551-2238', 'pfaullm@instagram.com', 'https://joomla.org');
-insert into users (username, full_name, mobile_phone, email, links_media) values (24, 'Jamill Spyvye', '443-533-4791', 'jspyvyen@plala.or.jp', 'https://godaddy.com');
-insert into users (username, full_name, mobile_phone, email, links_media) values (25, 'Ame Licence', '644-451-0416', 'alicenceo@simplemachines.org', 'http://paginegialle.it');
-insert into users (username, full_name, mobile_phone, email, links_media) values (26, 'Janela covino', '668-264-3068', 'jcovinop@wikimedia.org', 'http://nhs.uk');
-insert into users (username, full_name, mobile_phone, email, links_media) values (27, 'Gauthier Spear', '821-903-3654', 'gspearq@thetimes.co.uk', 'https://blinklist.com');
-insert into users (username, full_name, mobile_phone, email, links_media) values (28, 'Georgie Tellenbrok', '532-517-4362', 'gtellenbrokr@a8.net', 'https://bloglines.com');
-insert into users (username, full_name, mobile_phone, email, links_media) values (29, 'Kirbee Farden', '425-415-0556', 'kfardens@wikia.com', 'http://army.mil');
-insert into users (username, full_name, mobile_phone, email, links_media) values (30, 'Angeli Gazey', '471-324-7319', 'agazeyt@usda.gov', 'http://biglobe.ne.jp');
-insert into users (username, full_name, mobile_phone, email, links_media) values (31, 'Jon Shotbolt', 'Shotbolt', 'jshotbolt0@cmu.edu', 'http://who.int');
-insert into users (username, full_name, mobile_phone, email, links_media) values (32, 'Felicle Bramley', 'Bramley', 'fbramley1@purevolume.com', 'https://hubpages.com');
-insert into users (username, full_name, mobile_phone, email, links_media) values (33, 'Ursala Neame', 'Neame', 'uneame2@typepad.com', 'https://sfgate.com');
-insert into users (username, full_name, mobile_phone, email, links_media) values (34, 'Beryle Moran', 'Moran', 'bmoran3@sourceforge.net', 'https://cloudflare.com');
-insert into users (username, full_name, mobile_phone, email, links_media) values (35, 'Augustine Novkovic', 'Novkovic', 'anovkovic4@omniture.com', 'https://cpanel.net');
-insert into users (username, full_name, mobile_phone, email, links_media) values (36, 'Kerry Leirmonth', 'Leirmonth', 'kleirmonth5@reddit.com', 'http://youtube.com');
-insert into users (username, full_name, mobile_phone, email, links_media) values (37, 'Georas Prestney', 'Prestney', 'gprestney6@gmpg.org', 'https://hhs.gov');
-insert into users (username, full_name, mobile_phone, email, links_media) values (38, 'Blaine Phillpotts', 'Phillpotts', 'bphillpotts7@dmoz.org', 'http://yandex.ru');
-insert into users (username, full_name, mobile_phone, email, links_media) values (39, 'Faustine de Cullip', 'de Cullip', 'fde8@jigsy.com', 'http://hexun.com');
-insert into users (username, full_name, mobile_phone, email, links_media) values (40, 'Christina Thick', 'Thick', 'cthick9@a8.net', 'http://berkeley.edu');
+INSERT INTO users (username, full_name, mobile_phone, email, links_media, password_hash)
+VALUES (1, 'Ingra Pettendrich', '325-705-7937', 'ipettendrich0@sciencedaily.com', 'http://admin.ch', 'default_hash_placeholder');
+
+INSERT INTO users (username, full_name, mobile_phone, email, links_media, password_hash)
+VALUES (2, 'Heather Ganley', '989-869-0284', 'hganley1@eventbrite.com', 'https://bbb.org', 'default_hash_placeholder');
+
+INSERT INTO users (username, full_name, mobile_phone, email, links_media, password_hash)
+VALUES (3, 'Hart Winteringham', '334-425-1920', 'hwinteringham2@nationalgeographic.com', 'http://free.fr', 'default_hash_placeholder');
+
+INSERT INTO users (username, full_name, mobile_phone, email, links_media, password_hash)
+VALUES (4, 'Griffy Gosselin', '428-787-9863', 'ggosselin3@ocn.ne.jp', 'http://desdev.cn', 'default_hash_placeholder');
+
+INSERT INTO users (username, full_name, mobile_phone, email, links_media, password_hash)
+VALUES (5, 'Marcelo Tift', '389-256-1851', 'mtift4@yahoo.co.jp', 'http://skype.com', 'default_hash_placeholder');
+
+INSERT INTO users (username, full_name, mobile_phone, email, links_media, password_hash)
+VALUES (6, 'Dorie Londesborough', '834-492-1701', 'dlondesborough5@imgur.com', 'https://noaa.gov', 'default_hash_placeholder');
+
+INSERT INTO users (username, full_name, mobile_phone, email, links_media, password_hash)
+VALUES (7, 'Bartolomeo Knath', '207-381-8598', 'bknath6@statcounter.com', 'https://ibm.com', 'default_hash_placeholder');
+
+INSERT INTO users (username, full_name, mobile_phone, email, links_media, password_hash)
+VALUES (8, 'Ferdy Kalderon', '138-704-1462', 'fkalderon7@hhs.gov', 'http://wired.com', 'default_hash_placeholder');
+
+INSERT INTO users (username, full_name, mobile_phone, email, links_media, password_hash)
+VALUES (9, 'Osmond Matiebe', '563-621-6241', 'omatiebe8@xrea.com', 'https://istockphoto.com', 'default_hash_placeholder');
+
+INSERT INTO users (username, full_name, mobile_phone, email, links_media, password_hash)
+VALUES (10, 'Rex Witz', '536-916-1107', 'rwitz9@opera.com', 'http://fema.gov', 'default_hash_placeholder');
+
+INSERT INTO users (username, full_name, mobile_phone, email, links_media, password_hash)
+VALUES (11, 'Static-X', '999-121-9718', 'csedena@sfgate.com', 'http://wiley.com', 'default_hash_placeholder');
+
+INSERT INTO users (username, full_name, mobile_phone, email, links_media, password_hash)
+VALUES (12, 'Hannah Jackson', '667-381-7995', 'gveltib@edublogs.org', 'http://twitpic.com', 'default_hash_placeholder');
+
+INSERT INTO users (username, full_name, mobile_phone, email, links_media, password_hash)
+VALUES (13, 'The Beatles', '580-698-4740', 'jillistonc@virginia.edu', 'http://discuz.net', 'default_hash_placeholder');
+
+INSERT INTO users (username, full_name, mobile_phone, email, links_media, password_hash)
+VALUES (14, 'Valerie Theriot', '927-674-0266', 'vtheriotd@webeden.co.uk', 'http://dropbox.com', 'default_hash_placeholder');
+
+INSERT INTO users (username, full_name, mobile_phone, email, links_media, password_hash)
+VALUES (15, 'Courtnay Bartosik', '273-351-8347', 'cbartosike@hao123.com', 'http://sogou.com', 'default_hash_placeholder');
+
+INSERT INTO users (username, full_name, mobile_phone, email, links_media, password_hash)
+VALUES (16, 'Mar Farthing', '715-374-5966', 'mfarthingf@zimbio.com', 'http://exblog.jp', 'default_hash_placeholder');
+
+INSERT INTO users (username, full_name, mobile_phone, email, links_media, password_hash)
+VALUES (17, 'Adriena Nekrews', '904-935-3398', 'anekrewsg@fda.gov', 'https://google.nl', 'default_hash_placeholder');
+
+INSERT INTO users (username, full_name, mobile_phone, email, links_media, password_hash)
+VALUES (18, 'Natale Duthie', '178-207-8539', 'nduthieh@nymag.com', 'http://hhs.gov', 'default_hash_placeholder');
+
+INSERT INTO users (username, full_name, mobile_phone, email, links_media, password_hash)
+VALUES (19, 'Reagen Harrema', '531-293-2272', 'rharremai@tumblr.com', 'http://marketwatch.com', 'default_hash_placeholder');
+
+INSERT INTO users (username, full_name, mobile_phone, email, links_media, password_hash)
+VALUES (20, 'Hannah Jacksons', '265-769-3132', 'tbutteryj@chron.com', 'http://flickr.com', 'default_hash_placeholder');
+
+INSERT INTO users (username, full_name, mobile_phone, email, links_media, password_hash)
+VALUES (21, 'mariia123', '633-534-0875', 'lleasek@pinterest.com', 'http://twitpic.com', 'default_hash_placeholder');
+
+INSERT INTO users (username, full_name, mobile_phone, email, links_media, password_hash)
+VALUES (22, 'Mariia Ternavska', '263-840-2643', 'helkingtonl@engadget.com', 'http://dropbox.com', 'default_hash_placeholder');
+
+INSERT INTO users (username, full_name, mobile_phone, email, links_media, password_hash)
+VALUES (23, 'Phaidra Faull', '845-551-2238', 'pfaullm@instagram.com', 'https://joomla.org', 'default_hash_placeholder');
+
+INSERT INTO users (username, full_name, mobile_phone, email, links_media, password_hash)
+VALUES (24, 'Jamill Spyvye', '443-533-4791', 'jspyvyen@plala.or.jp', 'https://godaddy.com', 'default_hash_placeholder');
+
+INSERT INTO users (username, full_name, mobile_phone, email, links_media, password_hash)
+VALUES (25, 'Ame Licence', '644-451-0416', 'alicenceo@simplemachines.org', 'http://paginegialle.it', 'default_hash_placeholder');
+
+INSERT INTO users (username, full_name, mobile_phone, email, links_media, password_hash)
+VALUES (26, 'Janela covino', '668-264-3068', 'jcovinop@wikimedia.org', 'http://nhs.uk', 'default_hash_placeholder');
+
+INSERT INTO users (username, full_name, mobile_phone, email, links_media, password_hash)
+VALUES (27, 'Gauthier Spear', '821-903-3654', 'gspearq@thetimes.co.uk', 'https://blinklist.com', 'default_hash_placeholder');
+
+INSERT INTO users (username, full_name, mobile_phone, email, links_media, password_hash)
+VALUES (28, 'Georgie Tellenbrok', '532-517-4362', 'gtellenbrokr@a8.net', 'https://bloglines.com', 'default_hash_placeholder');
+
+INSERT INTO users (username, full_name, mobile_phone, email, links_media, password_hash)
+VALUES (29, 'Kirbee Farden', '425-415-0556', 'kfardens@wikia.com', 'http://army.mil', 'default_hash_placeholder');
+
+INSERT INTO users (username, full_name, mobile_phone, email, links_media, password_hash)
+VALUES (30, 'Angeli Gazey', '471-324-7319', 'agazeyt@usda.gov', 'http://biglobe.ne.jp', 'default_hash_placeholder');
+
+INSERT INTO users (username, full_name, mobile_phone, email, links_media, password_hash)
+VALUES (31, 'Jon Shotbolt', 'Shotbolt', 'jshotbolt0@cmu.edu', 'http://who.int', 'default_hash_placeholder');
+
+INSERT INTO users (username, full_name, mobile_phone, email, links_media, password_hash)
+VALUES (32, 'Felicle Bramley', 'Bramley', 'fbramley1@purevolume.com', 'https://hubpages.com', 'default_hash_placeholder');
+
+INSERT INTO users (username, full_name, mobile_phone, email, links_media, password_hash)
+VALUES (33, 'Ursala Neame', 'Neame', 'uneame2@typepad.com', 'https://sfgate.com', 'default_hash_placeholder');
+
+INSERT INTO users (username, full_name, mobile_phone, email, links_media, password_hash)
+VALUES (34, 'Beryle Moran', 'Moran', 'bmoran3@sourceforge.net', 'https://cloudflare.com', 'default_hash_placeholder');
+
+INSERT INTO users (username, full_name, mobile_phone, email, links_media, password_hash)
+VALUES (35, 'Augustine Novkovic', 'Novkovic', 'anovkovic4@omniture.com', 'https://cpanel.net', 'default_hash_placeholder');
+
+INSERT INTO users (username, full_name, mobile_phone, email, links_media, password_hash)
+VALUES (36, 'Kerry Leirmonth', 'Leirmonth', 'kleirmonth5@reddit.com', 'http://youtube.com', 'default_hash_placeholder');
+
+INSERT INTO users (username, full_name, mobile_phone, email, links_media, password_hash)
+VALUES (37, 'Georas Prestney', 'Prestney', 'gprestney6@gmpg.org', 'https://hhs.gov', 'default_hash_placeholder');
+
+INSERT INTO users (username, full_name, mobile_phone, email, links_media, password_hash)
+VALUES (38, 'Blaine Phillpotts', 'Phillpotts', 'bphillpotts7@dmoz.org', 'http://yandex.ru', 'default_hash_placeholder');
+
+INSERT INTO users (username, full_name, mobile_phone, email, links_media, password_hash)
+VALUES (39, 'Faustine de Cullip', 'de Cullip', 'fde8@jigsy.com', 'http://hexun.com', 'default_hash_placeholder');
+
+INSERT INTO users (username, full_name, mobile_phone, email, links_media, password_hash)
+VALUES (40, 'Christina Thick', 'Thick', 'cthick9@a8.net', 'http://berkeley.edu', 'default_hash_placeholder');
+
 -- nastavuji sekvenci kterou identifikuji pomocí pg_get_serial_sequence na hodnotu 2 abych mohl pokračovat přidáváním dalších řádků
 SELECT SETVAL(PG_GET_SERIAL_SEQUENCE('users', 'username'), 40);
 
@@ -192,6 +272,13 @@ insert into artist_user (username, manager_user_username, discography, biography
 insert into artist_user (username, manager_user_username, discography, biography, genre, photos) values (19, 4, 'most popular rock singer in the 90s', 'solution', 'Rock', NULL);
 insert into artist_user (username, manager_user_username, discography, biography, genre, photos) values (20, 5, 'benchmark', 'Open-architected', 'Pop', NULL);
 
+
+insert into content_moderator_user (username, tasks, moderation_history) values (6, 'moderate channel', NULL);
+insert into content_moderator_user (username, tasks, moderation_history) values (7, 'content evaluation', 'deleted a post on 11/11/2023');
+insert into content_moderator_user (username, tasks, moderation_history) values (8, 'monitor community guidelines', 'excluded user mariia123 from subscribers');
+insert into content_moderator_user (username, tasks, moderation_history) values (9, 'database analyzer', NULL);
+insert into content_moderator_user (username, tasks, moderation_history) values (10, 'check users` authentification', 'checked 100 users on 17/04/2024');
+
 insert into event_artist_user (event_id, username) values (1, 16);
 insert into event_artist_user (event_id, username) values (2, 15);
 insert into event_artist_user (event_id, username) values (3, 14);
@@ -227,11 +314,11 @@ insert into event_artist_user (event_id, username) values (12, 19);
 insert into event_artist_user (event_id, username) values (13, 20);
 
 
-insert into content_moderator_user (username, tasks, moderation_history) values (6, 'moderate channel', NULL);
-insert into content_moderator_user (username, tasks, moderation_history) values (7, 'content evaluation', 'deleted a post on 11/11/2023');
-insert into content_moderator_user (username, tasks, moderation_history) values (8, 'monitor community guidelines', 'excluded user mariia123 from subscribers');
-insert into content_moderator_user (username, tasks, moderation_history) values (9, 'database analyzer', NULL);
-insert into content_moderator_user (username, tasks, moderation_history) values (10, 'check users` authentification', 'checked 100 users on 17/04/2024');
+-- insert into content_moderator_user (username, tasks, moderation_history) values (6, 'moderate channel', NULL);
+-- insert into content_moderator_user (username, tasks, moderation_history) values (7, 'content evaluation', 'deleted a post on 11/11/2023');
+-- insert into content_moderator_user (username, tasks, moderation_history) values (8, 'monitor community guidelines', 'excluded user mariia123 from subscribers');
+-- insert into content_moderator_user (username, tasks, moderation_history) values (9, 'database analyzer', NULL);
+-- insert into content_moderator_user (username, tasks, moderation_history) values (10, 'check users` authentification', 'checked 100 users on 17/04/2024');
 
 insert into song_artist_user (song_id, username) values (1, 11);
 insert into song_artist_user (song_id, username) values (2, 11);

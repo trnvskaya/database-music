@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block title %}Songs - Music Platform{% endblock %}
+
+{% block content %}
+<h2 class="mb-4">Songs</h2>
+
+{% if songs %}
+<table class="table table-striped">
+    <thead>
+        <tr>
+            {% for col in songs[0].keys() %}
+                <th>{{ col }}</th>
+            {% endfor %}
+        </tr>
+    </thead>
+    <tbody>
+        {% for song in songs %}
+            <tr>
+                {% for val in song.values() %}
+                    <td>{{ val }}</td>
+                {% endfor %}
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p class="text-muted">No songs found.</p>
+{% endif %}
+{% endblock %}

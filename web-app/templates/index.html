@@ -1,14 +1,12 @@
 {% extends "base.html" %}
-
 {% block title %}Home - Music Platform{% endblock %}
-
 {% block content %}
 <div class="text-center my-5">
     <h1 class="display-4 fw-bold">
         <i class="fas fa-music text-primary"></i> Welcome to MusicPlatform
     </h1>
     <p class="lead text-muted mt-3">
-        Explore artists, discover songs, and stay up-to-date with music events.
+        Explore {{ stats.artists }} artists, discover {{ stats.songs }} songs, and stay up-to-date with {{ stats.events }} music events.
     </p>
     <a href="{{ url_for('artists') }}" class="btn btn-primary btn-lg mt-3">
         <i class="fas fa-users me-2"></i> View Artists
@@ -21,14 +19,14 @@
     </a>
 </div>
 
-<!-- Featured section -->
+<!-- Stats section -->
 <div class="row mt-5">
     <div class="col-md-4 mb-4">
         <div class="card shadow-sm h-100">
             <div class="card-body text-center">
                 <i class="fas fa-users fa-3x text-primary mb-3"></i>
                 <h5 class="card-title">Artists</h5>
-                <p class="card-text">Data comes from <code>artist_user</code> table.</p>
+                <p class="card-text">{{ stats.artists }} artists registered.</p>
                 <a href="{{ url_for('artists') }}" class="btn btn-sm btn-primary">View Artists</a>
             </div>
         </div>
@@ -38,7 +36,7 @@
             <div class="card-body text-center">
                 <i class="fas fa-music fa-3x text-success mb-3"></i>
                 <h5 class="card-title">Songs</h5>
-                <p class="card-text">Data comes from <code>song</code> table.</p>
+                <p class="card-text">{{ stats.songs }} songs available.</p>
                 <a href="{{ url_for('songs') }}" class="btn btn-sm btn-success">Browse Songs</a>
             </div>
         </div>
@@ -48,10 +46,32 @@
             <div class="card-body text-center">
                 <i class="fas fa-calendar fa-3x text-danger mb-3"></i>
                 <h5 class="card-title">Events</h5>
-                <p class="card-text">Data comes from <code>event</code> table.</p>
+                <p class="card-text">{{ stats.events }} events scheduled.</p>
                 <a href="{{ url_for('events') }}" class="btn btn-sm btn-danger">Upcoming Events</a>
             </div>
         </div>
     </div>
 </div>
+
+<!-- Recent Events Section -->
+{% if recent_events %}
+<div class="mt-5">
+    <h3 class="mb-4">Recent Events</h3>
+    <div class="row">
+        {% for event in recent_events %}
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">{{ event.description }}</h5>
+                    <p class="card-text">
+                        <strong>Date:</strong> {{ event.date }}<br>
+                        <strong>Location:</strong> {{ event.address }}, {{ event.city }}, {{ event.region }}, {{ event.country }}
+                    </p>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
 {% endblock %}

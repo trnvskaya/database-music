@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block title %}{{ artist.full_name }} - Music Platform{% endblock %}
+
+{% block content %}
+<h2>{{ artist.full_name }} ({{ artist.username }})</h2>
+<p><strong>Email:</strong> {{ artist.email }}</p>
+<p><strong>Genre:</strong> {{ artist.genre }}</p>
+<p><strong>Biography:</strong> {{ artist.biography }}</p>
+
+<h3 class="mt-4">Songs</h3>
+{% if songs %}
+<ul>
+    {% for song in songs %}
+    <li>{{ song.title }} ({{ song.duration }})</li>
+    {% endfor %}
+</ul>
+{% else %}
+<p>No songs found for this artist.</p>
+{% endif %}
+
+<h3 class="mt-4">Events</h3>
+{% if events %}
+<ul>
+    {% for event in events %}
+    <li>{{ event.name }} - {{ event.date }} @ {{ event.location_name }}</li>
+    {% endfor %}
+</ul>
+{% else %}
+<p>No upcoming events for this artist.</p>
+{% endif %}
+
+<a href="{{ url_for('artists') }}" class="btn btn-secondary mt-3">Back to Artists</a>
+{% endblock %}
