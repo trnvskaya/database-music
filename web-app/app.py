@@ -222,31 +222,140 @@ def index():
 
 
 
-
-@app.route('/profile')
+@app.route('/profile', methods=['GET', 'POST'])
 def profile():
     if 'username' not in session:
         flash('You must be logged in to view your profile.', 'error')
         return redirect(url_for('login'))
 
+    user_type = session.get('user_type')
+    username = session['username']
+
     conn = get_db_connection()
     cur = conn.cursor(cursor_factory=RealDictCursor)
-    cur.execute('SELECT * FROM users WHERE username = %s', (session['username'],))
+
+    # Fetch main user info
+    cur.execute('SELECT * FROM users WHERE username = %s', (username,))
     user = cur.fetchone()
 
+    # Fetch type-specific info
+    type_info = {}
     artist_songs = []
-    if session.get('user_type') == 'artist':
+    if user_type == 'artist':
+        cur.execute('SELECT * FROM artist_user WHERE username = %s', (username,))
+        type_info = cur.fetchone() or {}
         cur.execute('''
             SELECT s.song_id, s.name 
             FROM song s
             JOIN song_artist_user sau ON s.song_id = sau.song_id
             WHERE sau.username = %s
-        ''', (session['username'],))
+        ''', (username,))
         artist_songs = cur.fetchall()
+    elif user_type == 'manager':
+        cur.execute('SELECT * FROM manager_user WHERE username = %s', (username,))
+        type_info = cur.fetchone() or {}
+    elif user_type == 'basic':
+        cur.execute('SELECT * FROM basic_user WHERE username = %s', (username,))
+        type_info = cur.fetchone() or {}
+    elif user_type == 'moderator':
+        cur.execute('SELECT * FROM content_moderator_user WHERE username = %s', (username,))
+        type_info = cur.fetchone() or {}
+
+    # Handle profile update
+    if request.method == 'POST':
+        messages = []  # Collect messages to flash once
+
+        # General info (except email)
+        full_name = request.form.get('full_name')
+        mobile_phone = request.form.get('mobile_phone')
+        links_media = request.form.get('links_media')
+
+        cur.execute('''
+            UPDATE users SET full_name=%s, mobile_phone=%s, links_media=%s
+            WHERE username=%s
+        ''', (full_name, mobile_phone, links_media, username))
+
+        # Password change
+        old_password = request.form.get('old_password')
+        new_password = request.form.get('new_password')
+        if old_password and new_password:
+            if check_password_hash(user['password_hash'], old_password):
+                hashed_password = generate_password_hash(new_password)
+                cur.execute('UPDATE users SET password_hash=%s WHERE username=%s', (hashed_password, username))
+                messages.append('Password updated successfully!')
+            else:
+                messages.append('Old password is incorrect.')
+
+        # Update type-specific info
+        if user_type == 'artist':
+            discography = request.form.get('discography')
+            biography = request.form.get('biography')
+            genre = request.form.get('genre')
+            photos = request.form.get('photos')
+            cur.execute('''
+                UPDATE artist_user
+                SET discography=%s, biography=%s, genre=%s, photos=%s
+                WHERE username=%s
+            ''', (discography, biography, genre, photos, username))
+        elif user_type == 'manager':
+            role_for_artist = request.form.get('role_for_artist')
+            tasks = request.form.get('tasks')
+            cur.execute('''
+                UPDATE manager_user
+                SET role_for_artist=%s, tasks=%s
+                WHERE username=%s
+            ''', (role_for_artist, tasks, username))
+        elif user_type == 'basic':
+            # convert empty strings to None to avoid invalid date/float errors
+            def clean(val):
+                return val if val else None
+
+            birth_date = clean(request.form.get('birth_date'))
+            preferences = clean(request.form.get('preferences'))
+            profile_description = clean(request.form.get('profile_description'))
+            credit_card = clean(request.form.get('credit_card'))
+            subscription_type = clean(request.form.get('subscription_type'))
+            subscription_price = clean(request.form.get('subscription_price'))
+            subscription_date = clean(request.form.get('subscription_date'))
+            bank_information = clean(request.form.get('bank_information'))
+
+            cur.execute('''
+                UPDATE basic_user
+                SET birth_date=%s, preferences=%s, profile_description=%s,
+                    credit_card=%s, subscription_type=%s, subscription_price=%s,
+                    subscription_date=%s, bank_information=%s
+                WHERE username=%s
+            ''', (birth_date, preferences, profile_description, credit_card,
+                  subscription_type, subscription_price, subscription_date,
+                  bank_information, username))
+        elif user_type == 'moderator':
+            tasks = request.form.get('tasks')
+            moderation_history = request.form.get('moderation_history')
+            cur.execute('''
+                UPDATE content_moderator_user
+                SET tasks=%s, moderation_history=%s
+                WHERE username=%s
+            ''', (tasks, moderation_history, username))
+
+        conn.commit()
+        conn.close()
+
+        # Flash all messages at once
+        for msg in messages:
+            flash(msg, 'success')
+        if not messages:
+            flash('Profile updated successfully!', 'success')
+
+        return redirect(url_for('profile'))  # <- redirect prevents duplicates
 
     conn.close()
-    return render_template('auth/profile.html', user=user, artist_songs=artist_songs)
-
+    return render_template(
+        'auth/profile.html',
+        user=user,
+        type_info=type_info,
+        artist_songs=artist_songs,
+        user_type=user_type
+    )
 
 
 
@@ -449,170 +558,171 @@ def add_song():
 
 
 
-
-
-
 @app.route('/playlists')
 def playlists():
     login_check = require_login()
     if login_check:
         return login_check
-    
+
     conn = get_db_connection()
-    if not conn:
-        return render_template('playlists/list.html', playlists=[])
-    
-    try:
-        cur = conn.cursor()
-        cur.execute('''
-            SELECT p.*, u.username as owner_name 
-            FROM playlist p 
-            JOIN basic_user bu ON p.basic_user_id = bu.basic_user_id 
-            JOIN users u ON bu.user_id = u.user_id 
-            WHERE p.is_public = TRUE OR bu.user_id = %s 
-            ORDER BY p.created_at DESC
-        ''', (session['user_id'],))
-        playlists = cur.fetchall()
-        conn.close()
-        return render_template('playlists/list.html', playlists=playlists)
-        
-    except psycopg2.Error as e:
-        flash(f'Error loading playlists: {e}', 'error')
-        conn.close()
-        return render_template('playlists/list.html', playlists=[])
+    playlists = []
+    if conn:
+        try:
+            cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+            # Show all playlists
+            cur.execute('''
+                SELECT p.*, bu.basic_user_username AS owner_name
+                FROM playlist p
+                JOIN basic_user bu ON p.username = bu.username
+                ORDER BY p.playlist_id DESC
+            ''')
+            playlists = cur.fetchall()
+        except psycopg2.Error as e:
+            flash(f'Error loading playlists: {e}', 'danger')
+        finally:
+            conn.close()
+    return render_template('playlists/list.html', playlists=playlists)
+
 
 @app.route('/create_playlist', methods=['GET', 'POST'])
 def create_playlist():
     login_check = require_login()
     if login_check:
         return login_check
-    
+
     if request.method == 'POST':
-        name = request.form['name']
+        name = request.form['name']  # new playlist name
         description = request.form.get('description', '')
-        is_public = 'is_public' in request.form
-        
+        link = request.form.get('link', '')
+
         conn = get_db_connection()
         if not conn:
-            flash('Database connection failed', 'error')
+            flash('Database connection failed', 'danger')
             return render_template('playlists/create.html')
-        
+
         try:
-            cur = conn.cursor()
-            # Get basic_user_id
-            cur.execute('SELECT basic_user_id FROM basic_user WHERE user_id = %s', (session['user_id'],))
+            cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+
+            # Check if current user is a basic user
+            cur.execute('SELECT username FROM basic_user WHERE username = %s', (session['username'],))
             basic_user = cur.fetchone()
-            
+
             if not basic_user:
-                flash('Only basic users can create playlists', 'error')
+                flash('Only basic users can create playlists', 'danger')
                 return render_template('playlists/create.html')
-            
+
+            # Insert playlist with auto-increment ID
             cur.execute('''
-                INSERT INTO playlist (name, description, is_public, basic_user_id, created_at) 
-                VALUES (%s, %s, %s, %s, %s)
-            ''', (name, description, is_public, basic_user['basic_user_id'], datetime.now()))
-            
+                INSERT INTO playlist (username, name, description, link)
+                VALUES (%s, %s, %s, %s)
+            ''', (basic_user['username'], name, description, link))
+
             conn.commit()
-            conn.close()
-            
             flash('Playlist created successfully!', 'success')
             return redirect(url_for('playlists'))
-            
+
         except psycopg2.Error as e:
-            flash(f'Error creating playlist: {e}', 'error')
+            flash(f'Error creating playlist: {e}', 'danger')
+        finally:
             conn.close()
-    
+
     return render_template('playlists/create.html')
+
 
 @app.route('/playlist/<int:playlist_id>')
 def playlist_detail(playlist_id):
     login_check = require_login()
     if login_check:
         return login_check
-    
+
     conn = get_db_connection()
     if not conn:
+        flash('Database connection failed', 'danger')
         return redirect(url_for('playlists'))
-    
+
+    playlist = None
+    songs_in_playlist = []
+    songs_available = []
+
     try:
-        cur = conn.cursor()
-        
+        cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+
         # Get playlist info
         cur.execute('''
-            SELECT p.*, u.username as owner_name 
-            FROM playlist p 
-            JOIN basic_user bu ON p.basic_user_id = bu.basic_user_id 
-            JOIN users u ON bu.user_id = u.user_id 
+            SELECT p.*, bu.basic_user_username AS owner_name
+            FROM playlist p
+            JOIN basic_user bu ON p.username = bu.username
             WHERE p.playlist_id = %s
         ''', (playlist_id,))
         playlist = cur.fetchone()
-        
+
         if not playlist:
-            flash('Playlist not found', 'error')
+            flash('Playlist not found', 'warning')
             return redirect(url_for('playlists'))
-        
-        # Get playlist songs
+
+        # Songs already in playlist
         cur.execute('''
-            SELECT s.*, u.username as artist_name 
-            FROM song s 
-            JOIN song_playlist sp ON s.song_id = sp.song_id 
-            LEFT JOIN song_artist_user sau ON s.song_id = sau.song_id 
-            LEFT JOIN artist_user au ON sau.artist_user_id = au.artist_user_id 
-            LEFT JOIN users u ON au.user_id = u.user_id 
-            WHERE sp.playlist_id = %s 
-            ORDER BY sp.added_at
+            SELECT s.*
+            FROM song s
+            JOIN song_playlist sp ON s.song_id = sp.song_id
+            WHERE sp.playlist_id = %s
         ''', (playlist_id,))
-        songs = cur.fetchall()
-        
-        # Get all songs for adding to playlist
-        cur.execute('SELECT song_id, title FROM song ORDER BY title')
-        all_songs = cur.fetchall()
-        
-        conn.close()
-        return render_template('playlists/detail.html', playlist=playlist, songs=songs, all_songs=all_songs)
-        
+        songs_in_playlist = cur.fetchall()
+
+        # Songs NOT in playlist (to show in dropdown for adding)
+        cur.execute('''
+            SELECT *
+            FROM song
+            WHERE song_id NOT IN (
+                SELECT song_id FROM song_playlist WHERE playlist_id = %s
+            )
+        ''', (playlist_id,))
+        songs_available = cur.fetchall()
+
     except psycopg2.Error as e:
-        flash(f'Error loading playlist: {e}', 'error')
-        conn.close()
+        flash(f'Error loading playlist: {e}', 'danger')
         return redirect(url_for('playlists'))
+    finally:
+        conn.close()
+
+    return render_template(
+        'playlists/detail.html',
+        playlist=playlist,
+        songs_in_playlist=songs_in_playlist,
+        songs_available=songs_available
+    )
+
+
 
 @app.route('/add_song_to_playlist', methods=['POST'])
 def add_song_to_playlist():
     login_check = require_login()
     if login_check:
         return login_check
-    
+
     playlist_id = request.form['playlist_id']
     song_id = request.form['song_id']
-    
+
     conn = get_db_connection()
     if not conn:
         return jsonify({'success': False, 'message': 'Database connection failed'})
-    
+
     try:
         cur = conn.cursor()
-        
         # Check if song is already in playlist
         cur.execute('SELECT 1 FROM song_playlist WHERE playlist_id = %s AND song_id = %s', (playlist_id, song_id))
         if cur.fetchone():
             return jsonify({'success': False, 'message': 'Song already in playlist'})
-        
-        cur.execute('''
-            INSERT INTO song_playlist (playlist_id, song_id, added_at) 
-            VALUES (%s, %s, %s)
-        ''', (playlist_id, song_id, datetime.now()))
-        
+
+        # Insert song into playlist
+        cur.execute('INSERT INTO song_playlist (song_id, playlist_id) VALUES (%s, %s)', (song_id, playlist_id))
         conn.commit()
-        conn.close()
         return jsonify({'success': True, 'message': 'Song added to playlist'})
-        
+
     except psycopg2.Error as e:
-        conn.close()
         return jsonify({'success': False, 'message': str(e)})
-
-
-
-
+    finally:
+        conn.close()
 
 
 
