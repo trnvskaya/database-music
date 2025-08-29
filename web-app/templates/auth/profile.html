@@ -3,56 +3,153 @@
 
 {% block content %}
 <div class="container mt-5">
+
+    <!-- Flash messages at the top only -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
     <div class="row justify-content-center">
         <div class="col-md-8">
             <div class="card shadow">
                 <div class="card-body">
                     <h2 class="card-title text-center mb-4">Your Profile</h2>
 
-                    {% with messages = get_flashed_messages(with_categories=true) %}
-                        {% if messages %}
-                            {% for category, message in messages %}
-                                <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
-                                    {{ message }}
-                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                                </div>
-                            {% endfor %}
+                    <form method="POST">
+                        <!-- General info -->
+                        <div class="mb-3">
+                            <label>Full Name</label>
+                            <input type="text" class="form-control" name="full_name" value="{{ user.full_name }}">
+                        </div>
+                        <div class="mb-3">
+                            <label>Email (cannot be changed)</label>
+                            <input type="email" class="form-control" value="{{ user.email }}" readonly>
+                        </div>
+                        <div class="mb-3">
+                            <label>Mobile Phone</label>
+                            <input type="text" class="form-control" name="mobile_phone" value="{{ user.mobile_phone }}">
+                        </div>
+                        <div class="mb-3">
+                            <label>Links / Media</label>
+                            <input type="text" class="form-control" name="links_media" value="{{ user.links_media }}">
+                        </div>
+
+                        <!-- Password change -->
+                        <h4>Change Password</h4>
+                        <div class="mb-3">
+                            <label>Old Password</label>
+                            <input type="password" class="form-control" name="old_password">
+                        </div>
+                        <div class="mb-3">
+                            <label>New Password</label>
+                            <input type="password" class="form-control" name="new_password">
+                        </div>
+
+                        <!-- Type-specific sections -->
+                        {% if user_type == 'artist' %}
+                            <h4 class="mt-4">Artist Info</h4>
+                            <div class="mb-3">
+                                <label>Discography</label>
+                                <input type="text" class="form-control" name="discography" value="{{ type_info.discography }}">
+                            </div>
+                            <div class="mb-3">
+                                <label>Biography</label>
+                                <textarea class="form-control" name="biography">{{ type_info.biography }}</textarea>
+                            </div>
+                            <div class="mb-3">
+                                <label>Genre</label>
+                                <input type="text" class="form-control" name="genre" value="{{ type_info.genre }}">
+                            </div>
+                            <div class="mb-3">
+                                <label>Photos URL</label>
+                                <input type="text" class="form-control" name="photos" value="{{ type_info.photos }}">
+                            </div>
+
+                            {% if artist_songs %}
+                                <h4>Your Songs</h4>
+                                <ul class="list-group mb-3">
+                                    {% for song in artist_songs %}
+                                        <li class="list-group-item">
+                                            <a href="{{ url_for('song_detail', song_id=song.song_id) }}">{{ song.name }}</a>
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                            {% else %}
+                                <p class="text-muted">You have not added any songs yet.</p>
+                            {% endif %}
+                            <a href="{{ url_for('add_song') }}" class="btn btn-success mb-3">Add New Song</a>
+
+                        {% elif user_type == 'manager' %}
+                            <h4 class="mt-4">Manager Info</h4>
+                            <div class="mb-3">
+                                <label>Role for Artist</label>
+                                <input type="text" class="form-control" name="role_for_artist" value="{{ type_info.role_for_artist }}">
+                            </div>
+                            <div class="mb-3">
+                                <label>Tasks</label>
+                                <input type="text" class="form-control" name="tasks" value="{{ type_info.tasks }}">
+                            </div>
+
+                        {% elif user_type == 'basic' %}
+                            <h4 class="mt-4">Basic User Info</h4>
+                            <div class="mb-3">
+                                <label>Birth Date</label>
+                                <input type="date" class="form-control" name="birth_date" value="{{ type_info.birth_date }}">
+                            </div>
+                            <div class="mb-3">
+                                <label>Preferences</label>
+                                <input type="text" class="form-control" name="preferences" value="{{ type_info.preferences }}">
+                            </div>
+                            <div class="mb-3">
+                                <label>Profile Description</label>
+                                <textarea class="form-control" name="profile_description">{{ type_info.profile_description }}</textarea>
+                            </div>
+                            <div class="mb-3">
+                                <label>Credit Card</label>
+                                <input type="text" class="form-control" name="credit_card" value="{{ type_info.credit_card }}">
+                            </div>
+                            <div class="mb-3">
+                                <label>Subscription Type</label>
+                                <input type="text" class="form-control" name="subscription_type" value="{{ type_info.subscription_type }}">
+                            </div>
+                            <div class="mb-3">
+                                <label>Subscription Price</label>
+                                <input type="number" step="0.01" class="form-control" name="subscription_price" value="{{ type_info.subscription_price }}">
+                            </div>
+                            <div class="mb-3">
+                                <label>Subscription Date</label>
+                                <input type="date" class="form-control" name="subscription_date" value="{{ type_info.subscription_date }}">
+                            </div>
+                            <div class="mb-3">
+                                <label>Bank Information</label>
+                                <input type="text" class="form-control" name="bank_information" value="{{ type_info.bank_information }}">
+                            </div>
+
+                        {% elif user_type == 'moderator' %}
+                            <h4 class="mt-4">Moderator Info</h4>
+                            <div class="mb-3">
+                                <label>Tasks</label>
+                                <input type="text" class="form-control" name="tasks" value="{{ type_info.tasks }}">
+                            </div>
+                            <div class="mb-3">
+                                <label>Moderation History</label>
+                                <textarea class="form-control" name="moderation_history">{{ type_info.moderation_history }}</textarea>
+                            </div>
                         {% endif %}
-                    {% endwith %}
 
-                    <ul class="list-group list-group-flush mb-3">
-                        <li class="list-group-item"><strong>Full Name:</strong> {{ user.full_name }}</li>
-                        <li class="list-group-item"><strong>Email:</strong> {{ user.email }}</li>
-                        <li class="list-group-item"><strong>Username (ID):</strong> {{ user.username }}</li>
-                        <li class="list-group-item"><strong>User Type:</strong> {{ session.get('user_type', 'basic') }}</li>
-                    </ul>
+                        <div class="mt-4 text-center">
+                            <button type="submit" class="btn btn-primary">Save Changes</button>
+                            <a href="{{ url_for('index') }}" class="btn btn-secondary">Back to Home</a>
+                        </div>
+                    </form>
 
-                    {% if session.get('user_type') in ['artist', 'manager'] %}
-                        <a href="{{ url_for('create_event') }}" class="btn btn-warning mb-3">Create Event</a>
-                    {% endif %}
-
-                    {% if session.get('user_type') == 'artist' %}
-                        <a href="{{ url_for('add_song') }}" class="btn btn-success mb-4">Add New Song</a>
-
-                        {% if artist_songs %}
-                            <h4>Your Songs</h4>
-                            <ul class="list-group mb-3">
-                                {% for song in artist_songs %}
-                                    <li class="list-group-item">
-                                        <a href="{{ url_for('song_detail', song_id=song.song_id) }}">
-                                            {{ song.name }}
-                                        </a>
-                                    </li>
-                                {% endfor %}
-                            </ul>
-                        {% else %}
-                            <p class="text-muted">You have not added any songs yet.</p>
-                        {% endif %}
-                    {% endif %}
-
-                    <div class="mt-4 text-center">
-                        <a href="{{ url_for('index') }}" class="btn btn-primary">Back to Home</a>
-                    </div>
                 </div>
             </div>
         </div>

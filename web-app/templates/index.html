@@ -1,6 +1,42 @@
 {% extends "base.html" %}
 {% block title %}Home - Music Platform{% endblock %}
+
 {% block content %}
+<!-- Navigation Bar -->
+<nav class="navbar navbar-expand-lg navbar-light bg-light mb-4">
+    <div class="container">
+        <a class="navbar-brand" href="{{ url_for('index') }}">MusicPlatform</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('artists') }}">Artists</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('songs') }}">Songs</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('events') }}">Events</a>
+                </li>
+
+                {% if session.get('user_type') == 'basic' %}
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="playlistDropdown" role="button" data-bs-toggle="dropdown">
+                        Playlists
+                    </a>
+                    <ul class="dropdown-menu" aria-labelledby="playlistDropdown">
+                        <li><a class="dropdown-item" href="{{ url_for('playlists') }}">All Playlists</a></li>
+                        <li><a class="dropdown-item" href="{{ url_for('create_playlist') }}">Create Playlist</a></li>
+                    </ul>
+                </li>
+                {% endif %}
+            </ul>
+        </div>
+    </div>
+</nav>
+
 <div class="text-center my-5">
     <h1 class="display-4 fw-bold">
         <i class="fas fa-music text-primary"></i> Welcome to MusicPlatform

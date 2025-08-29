@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block title %}Playlist: {{ playlist.name }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Home</a></li>
+        <li class="breadcrumb-item"><a href="{{ url_for('playlists') }}">Playlists</a></li>
+        <li class="breadcrumb-item active" aria-current="page">{{ playlist.name }}</li>
+      </ol>
+    </nav>
+
+    <h2>{{ playlist.name }}</h2>
+    <p>{{ playlist.description }}</p>
+    <p><strong>Owner:</strong> {{ playlist.owner_name }}</p>
+    {% if not playlist.is_public %}
+        <span class="badge bg-secondary">Private</span>
+    {% endif %}
+
+    <h4 class="mt-4">Songs</h4>
+    {% if songs %}
+        <ul class="list-group mb-3">
+            {% for song in songs %}
+                <li class="list-group-item">{{ song.title }} {% if song.artist_name %}- {{ song.artist_name }}{% endif %}</li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p class="text-muted">No songs in this playlist yet.</p>
+    {% endif %}
+
+    <h5>Add a Song</h5>
+    <form id="add-song-form">
+        <div class="mb-3">
+            <select class="form-select" name="song_id" required>
+                <option value="">Select a song</option>
+                {% for s in all_songs %}
+                    <option value="{{ s.song_id }}">{{ s.title }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <input type="hidden" name="playlist_id" value="{{ playlist.playlist_id }}">
+        <button type="submit" class="btn btn-primary">Add Song</button>
+    </form>
+
+    <script>
+        const form = document.getElementById('add-song-form');
+        form.addEventListener('submit', async e => {
+            e.preventDefault();
+            const data = new FormData(form);
+            const response = await fetch('{{ url_for("add_song_to_playlist") }}', {
+                method: 'POST',
+                body: data
+            });
+            const result = await response.json();
+            alert(result.message);
+            if(result.success) location.reload();
+        });
+    </script>
+</div>
+{% endblock %}

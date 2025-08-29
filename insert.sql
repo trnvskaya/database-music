@@ -1,35 +1,35 @@
--- smazání všech záznamů z tabulek
+-- -- smazání všech záznamů z tabulek
 
-CREATE OR REPLACE FUNCTION clean_tables() RETURNS void AS
-$$
-DECLARE
-    l_stmt text;
-BEGIN
-    SELECT 'truncate ' || STRING_AGG(FORMAT('%I.%I', schemaname, tablename), ',')
-    INTO l_stmt
-    FROM pg_tables
-    WHERE schemaname IN ('public');
+-- CREATE OR REPLACE FUNCTION clean_tables() RETURNS void AS
+-- $$
+-- DECLARE
+--     l_stmt text;
+-- BEGIN
+--     SELECT 'truncate ' || STRING_AGG(FORMAT('%I.%I', schemaname, tablename), ',')
+--     INTO l_stmt
+--     FROM pg_tables
+--     WHERE schemaname IN ('public');
 
-    EXECUTE l_stmt || ' cascade';
-END;
-$$ LANGUAGE plpgsql;
-SELECT clean_tables();
+--     EXECUTE l_stmt || ' cascade';
+-- END;
+-- $$ LANGUAGE plpgsql;
+-- SELECT clean_tables();
 
--- reset sekvenci
+-- -- reset sekvenci
 
-CREATE OR REPLACE FUNCTION restart_sequences() RETURNS void AS
-$$
-DECLARE
-    i TEXT;
-BEGIN
-    FOR i IN (SELECT column_default FROM information_schema.columns WHERE column_default SIMILAR TO 'nextval%')
-        LOOP
-            EXECUTE 'ALTER SEQUENCE' || ' ' || SUBSTRING(SUBSTRING(i FROM '''[a-z_]*') FROM '[a-z_]+') || ' ' ||
-                    ' RESTART 1;';
-        END LOOP;
-END
-$$ LANGUAGE plpgsql;
-SELECT restart_sequences();
+-- CREATE OR REPLACE FUNCTION restart_sequences() RETURNS void AS
+-- $$
+-- DECLARE
+--     i TEXT;
+-- BEGIN
+--     FOR i IN (SELECT column_default FROM information_schema.columns WHERE column_default SIMILAR TO 'nextval%')
+--         LOOP
+--             EXECUTE 'ALTER SEQUENCE' || ' ' || SUBSTRING(SUBSTRING(i FROM '''[a-z_]*') FROM '[a-z_]+') || ' ' ||
+--                     ' RESTART 1;';
+--         END LOOP;
+-- END
+-- $$ LANGUAGE plpgsql;
+-- SELECT restart_sequences();
 
 
 
@@ -379,16 +379,16 @@ SELECT SETVAL(PG_GET_SERIAL_SEQUENCE('merchandise_product', 'product_id'), 19);
 
 
 
-insert into playlist (playlist_id, username, description, link) values (1, 21, 'Inverse', 'https://fema.gov');
-insert into playlist (playlist_id, username, description, link) values (2, 22, 'modular', 'https://wordpress.com');
-insert into playlist (playlist_id, username, description, link) values (3, 23, 'optimal', 'https://yahoo.co.jp');
-insert into playlist (playlist_id, username, description, link) values (4, 24, 'explicit', 'https://tmall.com');
-insert into playlist (playlist_id, username, description, link) values (5, 25, 'hub', 'https://delicious.com');
-insert into playlist (playlist_id, username, description, link) values (6, 26, 'encoding', 'http://scientificamerican.com');
-insert into playlist (playlist_id, username, description, link) values (7, 27, 'intranet', 'http://over-blog.com');
-insert into playlist (playlist_id, username, description, link) values (8, 28, 'Multi-tiered', 'https://ebay.co.uk');
-insert into playlist (playlist_id, username, description, link) values (9, 29, 'modular', 'https://amazonaws.com');
-insert into playlist (playlist_id, username, description, link) values (10, 30, 'holistic', 'https://ebay.com');
+insert into playlist (playlist_id,name, username, description, link) values (1, 'playlist1', 21, 'Inverse', 'https://fema.gov');
+insert into playlist (playlist_id,name, username, description, link) values (2,'', 22, 'modular', 'https://wordpress.com');
+insert into playlist (playlist_id,name, username, description, link) values (3,'smth', 23, 'optimal', 'https://yahoo.co.jp');
+insert into playlist (playlist_id,name, username, description, link) values (4,'hey', 24, 'explicit', 'https://tmall.com');
+insert into playlist (playlist_id,name, username, description, link) values (5,'cool playlist', 25, 'hub', 'https://delicious.com');
+insert into playlist (playlist_id,name, username, description, link) values (6,'what', 26, 'encoding', 'http://scientificamerican.com');
+insert into playlist (playlist_id,name, username, description, link) values (7,'', 27, 'intranet', 'http://over-blog.com');
+insert into playlist (playlist_id,name, username, description, link) values (8,'', 28, 'Multi-tiered', 'https://ebay.co.uk');
+insert into playlist (playlist_id,name, username, description, link) values (9,'', 29, 'modular', 'https://amazonaws.com');
+insert into playlist (playlist_id,name, username, description, link) values (10,'', 30, 'holistic', 'https://ebay.com');
 SELECT SETVAL(PG_GET_SERIAL_SEQUENCE('playlist', 'playlist_id'), 10);
 
 
